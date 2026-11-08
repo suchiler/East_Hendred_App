@@ -112,6 +112,23 @@ export const SITES = [
     spot: "South of the village, up on the downs. The mound sits in woodland just off the Ridgeway National Trail." }
 ];
 
+// Nature and landscape places for the Land page (public access only; never rare-species locations).
+// Scutchamer Knob is in SITES above and is reused. `section` links to a section of the Land page.
+export const NATURE_SITES = [
+  { id: "ridgeway-car-park", name: "Ridgeway car park", short: "Ridgeway car park", lat: 51.5621, lng: -1.3403, section: "ridgeway",
+    kind: "Access point", why: "Free informal car park at the top of Newbury Road: the easiest start for the Ridgeway and Scutchamer Knob.",
+    access: "The road up is potholed in places." },
+  { id: "ridgeway-down", name: "The Ridgeway at East Hendred Down", short: "The Ridgeway", lat: 51.5623, lng: -1.3407, section: "ridgeway",
+    kind: "National Trail", why: "Britain’s oldest road, here also the county boundary. A restricted byway: walkers, cyclists and horse riders only.",
+    access: "Public right of way." },
+  { id: "icknield-way", name: "Icknield Way crossing", short: "Icknield Way", lat: 51.5874, lng: -1.3359, section: "shape",
+    kind: "Ancient route", why: "The Ridgeway’s lower twin, crossing the chalk shelf at about 120 metres, just above the spring line.",
+    access: "On the public road; check the exact crossing point." },
+  { id: "brook-ford-lane", name: "East Hendred Brook at Ford Lane", short: "The brook", lat: 51.596, lng: -1.341, section: "water",
+    kind: "Chalk stream", why: "The spring-fed brook running north through the village, by the old ford lanes.",
+    access: "View from the public lanes." }
+];
+
 // The walk. TODO: confirm the order, and write "Getting there" directions from local knowledge.
 export const WALK = {
   facts: [

@@ -1,0 +1,688 @@
+{
+ "updated": "2026-11-08",
+ "intro": {
+  "title": "Why the village is here",
+  "body": [
+   "Stand at the church and you are standing on a seam. To the south the land climbs onto bare chalk downs; to the north it flattens into the clay of the Vale of White Horse. East Hendred sits exactly where the two meet, on a band of greensand that geologists, and the parish's own records, call the spring line (the junction of permeable chalk and greensand above impermeable Gault clay).",
+   "Rain that falls on the downs soaks down through the chalk until it hits the clay, then has nowhere to go but sideways — so it comes out as springs along the foot of the hills. That reliable water, beside dry hills good for sheep and a heavy, fertile vale good for corn and cattle, is why a string of villages grew up along this line, East Hendred among them.",
+   "Everything else on this page follows from that: the brook that runs through the village, the long thin shape of the parish reaching from vale to ridge, the sheep that made the wool town, and the Ridgeway on the skyline."
+  ],
+  "sources": [
+   {
+    "label": "Victoria County History, Berkshire vol. 4 (1924), 'Parishes: East Hendred'",
+    "url": "https://www.british-history.ac.uk/vch/berks/vol4/pp294-302"
+   },
+   {
+    "label": "Vale of White Horse DC: East Hendred Conservation Area Appraisal ('one of a number of spring-line villages')",
+    "url": "https://www.whitehorsedc.gov.uk/wp-content/uploads/sites/3/2020/10/East-Hendred-Conservation-Area-Appraisal.pdf"
+   },
+   {
+    "label": "BGS memoir: Geology of the Newbury district and part of the Abingdon district (sheet 267/253)",
+    "url": "https://webapps.bgs.ac.uk/memoirs/docs/B06127.html"
+   },
+   {
+    "label": "Wikipedia: East Hendred",
+    "url": "https://en.wikipedia.org/wiki/East_Hendred"
+   },
+   {
+    "label": "Wikipedia: Vale of White Horse",
+    "url": "https://en.wikipedia.org/wiki/Vale_of_White_Horse"
+   }
+  ]
+ },
+ "deepTime": [
+  {
+   "when": "c. 110–100 million years ago",
+   "what": "A calm, fairly deep sea lays down soft blue-grey mud: the Gault clay that now floors the Vale north of the village."
+  },
+  {
+   "when": "c. 100 million years ago",
+   "what": "The sea shallows and sandier, green-flecked sediment builds up: the Upper Greensand, the band the village stands on."
+  },
+  {
+   "when": "c. 100–66 million years ago",
+   "what": "A warm, clear sea covers southern England. Trillions of microscopic algae plates (coccoliths) settle on the sea floor to become the chalk of the downs, with flint nodules and sea-urchin fossils locked inside."
+  },
+  {
+   "when": "c. 66 million years ago onwards",
+   "what": "The sea retreats. Later earth movements (the same ones that raised the Alps) gently tilt the layers, so the chalk rises southwards and its broken edge faces north as the downland scarp."
+  },
+  {
+   "when": "Last 2.6 million years",
+   "what": "Repeated ice ages. The ice sheets never reached here, but frozen ground sealed the chalk, so meltwater ran over the surface and carved the valleys that are now dry."
+  },
+  {
+   "when": "c. 11,700 years ago",
+   "what": "The last cold stage ends. Woodland spreads, springs flow, and people start using the dry ridge as a route — the beginning of the Ridgeway."
+  }
+ ],
+ "deepTimeSources": [
+  {
+   "label": "Wikipedia: Gault",
+   "url": "https://en.wikipedia.org/wiki/Gault"
+  },
+  {
+   "label": "Wikipedia: Upper Greensand Formation",
+   "url": "https://en.wikipedia.org/wiki/Upper_Greensand_Formation"
+  },
+  {
+   "label": "Wikipedia: Chalk Group",
+   "url": "https://en.wikipedia.org/wiki/Chalk_Group"
+  },
+  {
+   "label": "Wikipedia: Dry valley",
+   "url": "https://en.wikipedia.org/wiki/Dry_valley"
+  },
+  {
+   "label": "BGS memoir: Geology of the Newbury district and part of the Abingdon district (sheet 267/253)",
+   "url": "https://webapps.bgs.ac.uk/memoirs/docs/B06127.html"
+  },
+  {
+   "label": "Wikipedia: The Ridgeway",
+   "url": "https://en.wikipedia.org/wiki/The_Ridgeway"
+  }
+ ],
+ "sections": [
+  {
+   "id": "rocks",
+   "title": "Rocks",
+   "summary": "Three layers, laid down in ancient seas, run across the parish in bands: clay, greensand and chalk.",
+   "body": [
+    "Walk south from the A417 to the Ridgeway and you cross three rocks in order of age, youngest at the top. First the Gault (a stiff blue clay formed on a quiet sea floor), which underlies the flat farmland of the Vale. Then the Upper Greensand (a fine, green-speckled sandstone and silt, coloured by the mineral glauconite), the narrow band the old village sits on. Then the Chalk, which makes up all the high ground.",
+    "The chalk is not one uniform rock. The lower part (the Grey Chalk) is softer, greyer and marly, and forms the gentler slopes and the broad shelf between the village and the downs. Higher up, the White Chalk is harder and purer, with lines of flint nodules; it forms the steep face of the downs and the ridge the Ridgeway follows. British Geological Survey mapping of this stretch of the scarp describes a lower chalk slope, then a break of slope where the steeper escarpment begins.",
+    "Chalk is made almost entirely of the microscopic shells of floating algae (coccolithophores). Flint formed later, as silica gathered into nodules inside the soft chalk, often around buried burrows and shells. That is why so many chalk fossils, especially sea urchins, survive as flint casts in the plough soil.",
+    "Folklore made much of them. The heart-shaped sea urchins (Micraster) and dome-shaped ones (Echinocorys) were known across southern England as shepherds' crowns or fairy loaves. Country people kept them on the dairy shelf to stop milk going sour, or by the hearth so the family would never go short of bread."
+   ],
+   "lookFor": "In ploughed fields beside public footpaths after autumn ploughing and winter rain: white chalk turned up on the downs, dark broken flints, and occasionally a flint sea urchin. On the Ridgeway itself, look at the ruts — the track is cut straight into the chalk. Look, photograph and leave things where they are unless the landowner has said you may collect.",
+   "issues": {
+    "title": "Collecting responsibly",
+    "body": [
+     "Fossils and flints belong to the landowner, and a public footpath gives you the right to walk, not to take. Permission is needed before collecting on private land, and on Sites of Special Scientific Interest removing geological specimens needs Natural England's consent.",
+     "There are no geological SSSIs in the parish, so the main rule here is simple: ask first, and stick to the path."
+    ]
+   },
+   "link": {
+    "label": "Fossil collecting in the UK: the rules and good practice (Palaeontological Association)",
+    "url": "https://www.palass.org/fossil-collecting-uk"
+   },
+   "sources": [
+    {
+     "label": "Victoria County History, Berkshire vol. 4 (1924), 'Parishes: East Hendred'",
+     "url": "https://www.british-history.ac.uk/vch/berks/vol4/pp294-302"
+    },
+    {
+     "label": "BGS memoir: Geology of the Newbury district and part of the Abingdon district (sheet 267/253)",
+     "url": "https://webapps.bgs.ac.uk/memoirs/docs/B06127.html"
+    },
+    {
+     "label": "Wikipedia: Chalk Group",
+     "url": "https://en.wikipedia.org/wiki/Chalk_Group"
+    },
+    {
+     "label": "Wikipedia: Gault",
+     "url": "https://en.wikipedia.org/wiki/Gault"
+    },
+    {
+     "label": "Wikipedia: Upper Greensand Formation",
+     "url": "https://en.wikipedia.org/wiki/Upper_Greensand_Formation"
+    },
+    {
+     "label": "Wikipedia: Fossil echinoids (shepherd's crowns)",
+     "url": "https://en.wikipedia.org/wiki/Fossil_echinoids"
+    },
+    {
+     "label": "Deposits Magazine: Fossil folklore — echinoderms",
+     "url": "https://depositsmag.com/2017/04/04/folklore-of-fossil-echinoderms/"
+    },
+    {
+     "label": "Palaeontological Association: Fossil collecting in the UK",
+     "url": "https://www.palass.org/fossil-collecting-uk"
+    },
+    {
+     "label": "Natural England technical note on geological specimen collecting",
+     "url": "https://publications.naturalengland.org.uk/file/1757862"
+    },
+    {
+     "label": "Natural England SSSI boundaries (England), queried around the parish",
+     "url": "https://environment.data.gov.uk/spatialdata/sites-of-special-scientific-interest-england/wms?service=WMS&request=GetCapabilities"
+    }
+   ],
+   "art": "section-rocks",
+   "check": "Where exactly each band crosses the parish still needs checking against the British Geological Survey’s geology map."
+  },
+  {
+   "id": "shape",
+   "title": "The shape of the land",
+   "summary": "A long thin parish that climbs about 120 metres from the clay vale, through the village hollow and across a chalk shelf, to the crest of the downs.",
+   "body": [
+    "Like its neighbours, East Hendred is a strip parish: long and narrow, running north–south so that each village got a share of every kind of land — wet meadow and clay in the vale, the spring line for houses and water, and dry downland pasture on the hills. The parish covered 3,061 acres in 1924.",
+    "Heights tell the story. The village centre lies at about 85 metres, in a shallow hollow cut by the brook (the land by the A417 is a little higher, at about 94 metres). Southwards the ground rises to a broad shelf at roughly 125–140 metres, crossed by the Icknield Way. Then comes the scarp: in under a kilometre the downs climb from about 140 to over 200 metres. The top of Scutchamer Knob, beside the Ridgeway, is about 208 metres above sea level.",
+    "Beyond the crest the chalk slopes gently away south (the dip slope) towards the Kennet valley. The downs are cut by valleys with no streams in them. These dry valleys were carved during the ice ages, when frozen ground stopped water sinking into the chalk; when the ground thawed, the water went back underground and the valleys were left high and dry.",
+    "Old field names on today's maps still describe the high ground: Fore Down, Knob Down, Sheep Down and Wether Down (a wether is a castrated ram, kept for its wool)."
+   ],
+   "lookFor": "Walk or drive up Newbury Road from the village to the Ridgeway car park and watch the gradient change: gentle over the shelf, then a sharp pull up the scarp. From the top, look north over the village to the flat Vale and the Thames valley beyond. Best on a clear winter day.",
+   "issues": {
+    "title": "A protected but working landscape",
+    "body": [
+     "The downs above the village lie within the North Wessex Downs National Landscape (formerly an Area of Outstanding Natural Beauty), designated to conserve its natural beauty. Almost all of it is privately farmed, so access is along public rights of way and the Ridgeway.",
+     "The low ground is changing faster: the westernmost part of the Harwell Science and Innovation Campus lies inside the parish, and growth there and around Didcot shapes the northern and eastern views."
+    ]
+   },
+   "link": {
+    "label": "North Wessex Downs National Landscape",
+    "url": "https://www.northwessexdowns.org.uk/"
+   },
+   "sources": [
+    {
+     "label": "Victoria County History, Berkshire vol. 4 (1924), 'Parishes: East Hendred'",
+     "url": "https://www.british-history.ac.uk/vch/berks/vol4/pp294-302"
+    },
+    {
+     "label": "Wikipedia: West Hendred (downland linear parish)",
+     "url": "https://en.wikipedia.org/wiki/West_Hendred"
+    },
+    {
+     "label": "Mapzen/Tilezen Terrarium elevation tiles (AWS Open Data), sampled along the line",
+     "url": "https://registry.opendata.aws/terrain-tiles/"
+    },
+    {
+     "label": "OpenStreetMap data for the parish (place names, woods, rights of way, heights) © OpenStreetMap contributors",
+     "url": "https://www.openstreetmap.org/"
+    },
+    {
+     "label": "Wikipedia: Berkshire Downs",
+     "url": "https://en.wikipedia.org/wiki/Berkshire_Downs"
+    },
+    {
+     "label": "Wikipedia: Dry valley",
+     "url": "https://en.wikipedia.org/wiki/Dry_valley"
+    },
+    {
+     "label": "Wikipedia: East Hendred",
+     "url": "https://en.wikipedia.org/wiki/East_Hendred"
+    },
+    {
+     "label": "Wikipedia: Harwell Science and Innovation Campus",
+     "url": "https://en.wikipedia.org/wiki/Harwell_Science_and_Innovation_Campus"
+    }
+   ],
+   "art": "section-shape",
+   "check": "Heights come from satellite elevation data (accurate to about 5–10 m). The parish’s exact boundaries need confirming.",
+   "place": "icknield-way"
+  },
+  {
+   "id": "ridgeway",
+   "title": "The Ridgeway",
+   "summary": "Britain's oldest road runs along the parish's southern edge, past Scutchamer Knob — a route for traders, armies and drovers for at least 5,000 years.",
+   "body": [
+    "Along the crest of the downs, the Ridgeway forms the southern edge of the parish. It is often called Britain's oldest road: people have used it for at least 5,000 years, because the high, dry chalk was easier to travel than the wet, wooded vale below, and gave long views of anyone approaching. It linked the Dorset coast with the Wash.",
+    "It never ran alone. A second, lower route, the Icknield Way, runs parallel just above the spring line — it still crosses the parish about two kilometres south of the A417, at around 120 metres. Between the two, people could choose high and dry or low and close to water, depending on the season.",
+    "Beside the track stands Scutchamer Knob (also called Cuckhamsley Hill), a large round barrow made of layers of turf. Historic England thinks it probably began as a Bronze Age burial mound, later used in the Iron Age and after. Its old name, Cwichelm's Low, links it to a 7th-century prince of Wessex. In 1006 a Viking army marched here because, it was said, raiders who reached it would never get back to the sea; and for centuries it was the meeting place of the shire court (moot), until 1620. Repeated digging for Cwichelm's grave left the mound its lopsided shape — nothing important was ever found.",
+    "From the Middle Ages into the 1800s, drovers walked sheep and cattle along the Ridgeway from the West Country and Wales towards London. Many flocks were bound for the great sheep fairs at East Ilsley, just over the downs to the south-east. Until enclosure the 'road' was really a broad band of tracks across open down; hedges and banks, built from the 18th century, pinned it to the line we follow today.",
+    "In 1973 it opened as the Ridgeway National Trail, 87 miles (139 km) from Overton Hill near Avebury to Ivinghoe Beacon. Here, at East Hendred Down, the trail also marks the county boundary: north is Oxfordshire, south is West Berkshire. This stretch is a restricted byway — open to walkers, cyclists and horse riders, but not to private motor vehicles."
+   ],
+   "lookFor": "Park at the free informal car park on the Ridgeway south of the village and walk a few minutes west to Scutchamer Knob, through the metal kissing gate (the barrow is privately owned, with public access). Look for the barrow's misshapen top, the views north across the Vale, skylarks overhead in spring and summer, and chalk downland flowers on the track banks. Look for the black Ridgeway signposts and acorn waymarks.",
+   "issues": {
+    "title": "Wear and tear on an ancient road",
+    "body": [
+     "In wet weather the chalk track ruts and turns to mud. Through the 2000s, damage by recreational 4×4s and motorbikes led councils to restrict vehicles; in Oxfordshire the Ridgeway carries no byway sections, so the public should not drive on it at all, and barriers have been installed in places. Farm, maintenance and emergency vehicles are still allowed.",
+     "Scutchamer Knob is a scheduled monument: please don't climb on eroded parts, dig, or use metal detectors there."
+    ]
+   },
+   "link": {
+    "label": "Friends of the Ridgeway — help look after the trail",
+    "url": "https://ridgewayfriends.org.uk/"
+   },
+   "sources": [
+    {
+     "label": "Wikipedia: The Ridgeway",
+     "url": "https://en.wikipedia.org/wiki/The_Ridgeway"
+    },
+    {
+     "label": "National Trails: The Ridgeway",
+     "url": "https://www.nationaltrail.co.uk/en_GB/trails/the-ridgeway/"
+    },
+    {
+     "label": "Wikipedia: Icknield Way",
+     "url": "https://en.wikipedia.org/wiki/Icknield_Way"
+    },
+    {
+     "label": "Wikipedia: Scutchamer Knob",
+     "url": "https://en.wikipedia.org/wiki/Scutchamer_Knob"
+    },
+    {
+     "label": "National Trails: Scutchamer Knob round barrow",
+     "url": "https://www.nationaltrail.co.uk/en_GB/attraction/scutchamer-knob-round-barrow/"
+    },
+    {
+     "label": "Historic England list entry 1006312: Scutchamer Knob",
+     "url": "https://historicengland.org.uk/listing/the-list/list-entry/1006312"
+    },
+    {
+     "label": "National Trails: Historic Ridgeway — droving and East Ilsley sheep fairs",
+     "url": "https://nationaltrail.co.uk/en_GB/?p=203502"
+    },
+    {
+     "label": "West Berkshire Council: rights of way and trails (Ridgeway restrictions)",
+     "url": "https://parish.westberks.gov.uk/trails"
+    },
+    {
+     "label": "Oxfordshire County Council news: Ridgeway visitors urged not to damage historic route",
+     "url": "https://news.oxfordshire.gov.uk/ridgeway-visitors-urged-not-to-damage-historic-route/"
+    },
+    {
+     "label": "OpenStreetMap data for the parish (place names, woods, rights of way, heights) © OpenStreetMap contributors",
+     "url": "https://www.openstreetmap.org/"
+    },
+    {
+     "label": "Mapzen/Tilezen Terrarium elevation tiles (AWS Open Data), sampled along the line",
+     "url": "https://registry.opendata.aws/terrain-tiles/"
+    }
+   ],
+   "art": "section-ridgeway",
+   "check": "Sources disagree on whether Scutchamer Knob began in the Bronze Age or the Iron Age.",
+   "place": "knob",
+   "feature": true
+  },
+  {
+   "id": "water",
+   "title": "Water",
+   "summary": "Springs at the foot of the downs feed East Hendred Brook, which runs north through the village to the Thames.",
+   "body": [
+    "The chalk of the downs works like a giant sponge (an aquifer). Rain soaks in, moves slowly downwards and northwards, and comes out where the chalk and greensand sit on the watertight Gault — the spring line. That is where East Hendred Brook begins.",
+    "The brook runs north through the village (the lanes called Ford Lane and Fordy Lane are a clue to where it was once crossed on foot or by cart), then under the A417 and across the Vale. Downstream it becomes the Ginge Brook and then the Mill Brook before joining the Thames between Abingdon and Wallingford. Mills used this water from Saxon times: Domesday records a mill in the village, and the mill by Ludbridge stands on the brook today.",
+    "Spring-fed streams like this are chalk streams, a rare kind of river: of about 210 chalk streams in the world, around 160 are in England. Because they are fed from underground, their water is clear, cool and steady in flow and temperature through the year, which suits plants like water crowfoot and insects that need clean, well-oxygenated water. The Hendred streams are listed among the scarp-face tributaries of the Thames in the national index of English chalk streams.",
+    "The Environment Agency monitors the Ginge Brook and Mill Brook as one water body, about 17 km long with a catchment of about 40 km². Its last full assessment (2019) found the insect life in high condition, but the overall ecological status only moderate, held back by phosphate and plant indicators."
+   ],
+   "lookFor": "Where the brook passes through the village by Ford Lane and Fordy Lane: look into the clear water for weed swaying in the current, and in summer for damselflies. After a wet winter, notice how the brook keeps flowing steadily long after rain has stopped — that is groundwater from the chalk.",
+   "issues": {
+    "title": "Clean and flowing water",
+    "body": [
+     "The Environment Agency names continuous sewage discharge from the water industry as a reason the Ginge Brook and Mill Brook water body is not in good condition, affecting phosphate and the river's plants. Downstream, the sewage works at Drayton recorded 116 storm overflow spills into the Ginge Brook in 2023, lasting 1,851 hours in total.",
+     "Like every river in England, it fails the chemical test because of very persistent substances (such as mercury and PFOS) found nationally. Across England, taking too much groundwater (abstraction) and drought can reduce chalk-stream flows."
+    ]
+   },
+   "link": {
+    "label": "See the brook's latest water-quality data (Environment Agency)",
+    "url": "https://environment.data.gov.uk/catchment-planning/v/c3-plan/WaterBody/GB106039023660"
+   },
+   "sources": [
+    {
+     "label": "BGS memoir: Geology of the Newbury district and part of the Abingdon district (sheet 267/253)",
+     "url": "https://webapps.bgs.ac.uk/memoirs/docs/B06127.html"
+    },
+    {
+     "label": "Victoria County History, Berkshire vol. 4 (1924), 'Parishes: East Hendred'",
+     "url": "https://www.british-history.ac.uk/vch/berks/vol4/pp294-302"
+    },
+    {
+     "label": "Wikipedia: East Hendred Brook",
+     "url": "https://en.wikipedia.org/wiki/East_Hendred_Brook"
+    },
+    {
+     "label": "Wikipedia: East Hendred",
+     "url": "https://en.wikipedia.org/wiki/East_Hendred"
+    },
+    {
+     "label": "OpenStreetMap data for the parish (place names, woods, rights of way, heights) © OpenStreetMap contributors",
+     "url": "https://www.openstreetmap.org/"
+    },
+    {
+     "label": "Environment Agency Catchment Data Explorer: Ginge Brook and Mill Brook (GB106039023660)",
+     "url": "https://environment.data.gov.uk/catchment-planning/v/c3-plan/WaterBody/GB106039023660"
+    },
+    {
+     "label": "Wikipedia: Chalk stream",
+     "url": "https://en.wikipedia.org/wiki/Chalk_stream"
+    },
+    {
+     "label": "Chalk Streams First: The Index of English Chalk Streams (2020)",
+     "url": "https://chalkstreams.org/2020/10/28/the-index-of-english-chalk-streams/"
+    },
+    {
+     "label": "Top of the Poops (EA event duration monitoring data, 2023) — Wantage constituency",
+     "url": "https://top-of-the-poops.org/constituency/wantage"
+    }
+   ],
+   "art": "section-water",
+   "check": "Maps disagree on the brook’s name through the village and where it reaches the Thames; worth checking locally.",
+   "place": "brook-ford-lane"
+  },
+  {
+   "id": "soils",
+   "title": "Soils and farming",
+   "summary": "Thin chalky soil on the downs for sheep, loam at the spring line for houses and orchards, heavy clay in the vale for corn and cattle.",
+   "body": [
+    "In 1924 the parish's soil was described as chalk and loam, over chalk in the south, greensand in the centre and blue Gault toward the north. Of its 3,061 acres, about half (1,502) was ploughed, 520 were permanent grass and 81 were woods and plantations, with 'good pasture on the high down land'.",
+    "For centuries the downs and the vale worked as one system. Huge flocks of sheep grazed the downs by day and were folded on the arable fields at night, where their manure fed the corn. The sheep gave wool too: the Berkshire Downs were famous for it, and in the 15th century the cloth trade made East Hendred rich enough to be called a town.",
+    "The spring line suited fruit and gardens as well as houses: along this foot of the hills an accessible water table helped villages grow fruit, grain and vegetables. Small traditional orchards still survive around the north side of the village today.",
+    "The Enclosure Act of 1801 replaced the medieval open strips with hedged fields, and from the 18th century onwards farms on the downs grew larger and fewer. Today the arable downs are big open fields, and horses train on the downland turf nearby, part of a racing industry that grew up on the Berkshire Downs in the 19th century."
+   ],
+   "lookFor": "From the footpaths south of the village, look at the soil colour change as you climb: brownish loam near the village, then white-speckled chalky soil on the downs. In spring, look for blossom in the old orchards on the village edge (from public paths). Look for straight-sided fields and hedges — a sign of enclosure.",
+   "issues": {
+    "title": "Farming and wildlife",
+    "body": [
+     "Birds that depend on farmland have declined steeply: England's farmland bird index is about 60% below its 1970 level. The open downs here are one of the remaining strongholds for corn bunting, yellowhammer, linnet and grey partridge.",
+     "Wide field margins, winter stubbles and sympathetic hedge cutting help, and many farms on the North Wessex Downs take part in schemes to provide them."
+    ]
+   },
+   "link": {
+    "label": "Farmland birds of the North Wessex Downs and how farmers help them",
+    "url": "https://www.northwessexdowns.org.uk/visit_explore/farmland-birds/"
+   },
+   "sources": [
+    {
+     "label": "Victoria County History, Berkshire vol. 4 (1924), 'Parishes: East Hendred'",
+     "url": "https://www.british-history.ac.uk/vch/berks/vol4/pp294-302"
+    },
+    {
+     "label": "Wikipedia: Berkshire Downs",
+     "url": "https://en.wikipedia.org/wiki/Berkshire_Downs"
+    },
+    {
+     "label": "Wikipedia: Vale of White Horse",
+     "url": "https://en.wikipedia.org/wiki/Vale_of_White_Horse"
+    },
+    {
+     "label": "Natural England Priority Habitat Inventory (England), queried for the parish area (OGL)",
+     "url": "https://environment.data.gov.uk/dataset/92b43165-0dd0-4e69-a712-1e49bb5aa0d0"
+    },
+    {
+     "label": "Wikipedia: East Hendred",
+     "url": "https://en.wikipedia.org/wiki/East_Hendred"
+    },
+    {
+     "label": "Defra: Wild bird populations in the UK and England, 1970 to 2023",
+     "url": "https://www.gov.uk/government/statistics/wild-bird-populations-in-the-uk/wild-bird-populations-in-the-uk-and-england-1970-to-2023"
+    },
+    {
+     "label": "North Wessex Downs National Landscape: farmland birds",
+     "url": "https://www.northwessexdowns.org.uk/visit_explore/farmland-birds/"
+    },
+    {
+     "label": "North Wessex Downs: Biodiversity – farmland (factsheet)",
+     "url": "https://northwessexdowns.org.uk/wp-content/uploads/2021/12/Biodiversity-farmland.pdf"
+    }
+   ],
+   "art": "section-soils",
+   "check": "Some 1924 figures come from summaries of the Victoria County History rather than the original page."
+  },
+  {
+   "id": "living",
+   "title": "Living things",
+   "summary": "Woodland strips, hedgerows, old orchards, a chalk stream and fragments of flower-rich chalk grassland, with skylarks and red kites overhead.",
+   "body": [
+    "The parish's habitats follow the rocks. On the downs, most land is arable, broken by long belts of trees planted as shelter and cover — the map is full of them: Knob Down Wood, Foredown Plantation, Icknield Plantation and many 'Rows'. Natural England's habitat inventory records over 80 hectares of broadleaved woodland in and around the parish, but only small fragments of chalk grassland, the flower-rich turf the downs were once covered in.",
+    "Where chalk grassland survives — on banks, verges and along the Ridgeway — look for its typical flowers: knapweeds, scabious, rock-rose, wild thyme, bird's-foot trefoil and other vetches. These feed chalk butterflies such as the marbled white and, where horseshoe vetch grows, the chalkhill blue.",
+    "The open fields are home to farmland birds that have become scarce elsewhere: skylarks singing high overhead from early spring, yellowhammers on hedgetops, corn buntings jangling from fence posts, and meadow pipits and kestrels along the Ridgeway. Brown hares are typical of these big arable downs.",
+    "Lower down, the old orchards and hedges around the village and the clear spring-fed brook add other life — insects that need clean water, and the birds and bats that feed on them.",
+    "For the richest chalk downland nearby, visit Aston Upthorpe Downs east of the A34, a Site of Special Scientific Interest of dry valleys, juniper scrub and grassland with the county's only pasque flowers. For chalk-stream wildlife, the Letcombe Valley reserve near Wantage protects a stretch of the Letcombe Brook with water voles, brown trout, bullhead and brook lamprey."
+   ],
+   "lookFor": "Spring to midsummer on the Ridgeway: skylarks rising and singing, flowers on the track banks, butterflies on warm still days (June–August for marbled whites and chalkhill blues). Winter: flocks of finches and buntings on stubbles, and red kites any time of year. Please keep dogs on leads near ground-nesting birds from March to July.",
+   "issues": {
+    "title": "Disappearing grassland",
+    "body": [
+     "Chalk grassland is one of England's richest habitats for plants and insects, and one of its most reduced: across the North Wessex Downs its area fell by about a third between 1968 and 1998, and more than 80% has been lost nationally over two centuries, to ploughing and to scrub when grazing stopped.",
+     "Many farmland species have declined with it. Records from local people help conservationists see what is still here."
+    ]
+   },
+   "link": {
+    "label": "Share your wildlife sightings with the Thames Valley Environmental Records Centre",
+    "url": "https://www.tverc.org/recorders/share-your-records"
+   },
+   "sources": [
+    {
+     "label": "OpenStreetMap data for the parish (place names, woods, rights of way, heights) © OpenStreetMap contributors",
+     "url": "https://www.openstreetmap.org/"
+    },
+    {
+     "label": "Natural England Priority Habitat Inventory (England), queried for the parish area (OGL)",
+     "url": "https://environment.data.gov.uk/dataset/92b43165-0dd0-4e69-a712-1e49bb5aa0d0"
+    },
+    {
+     "label": "Oxfordshire Wildlife & Landscape Study (OWLS): lowland calcareous grassland",
+     "url": "https://owls.oxfordshire.gov.uk/wps/wcm/connect/occ/OWLS/Home/Priority+Habitats/Lowland+Calcareous+Grassland/OWLS+-+Lowland+Calcareous+Grassland"
+    },
+    {
+     "label": "North Wessex Downs National Landscape: butterflies",
+     "url": "https://www.northwessexdowns.org.uk/visit_explore/butterflies/"
+    },
+    {
+     "label": "North Wessex Downs: Biodiversity – chalk grasslands (factsheet)",
+     "url": "https://www.northwessexdowns.org.uk/wp-content/uploads/2021/12/biodiversity-chalk-grasslands.pdf"
+    },
+    {
+     "label": "North Wessex Downs National Landscape: farmland birds",
+     "url": "https://www.northwessexdowns.org.uk/visit_explore/farmland-birds/"
+    },
+    {
+     "label": "North Wessex Downs: Biodiversity – farmland (factsheet)",
+     "url": "https://northwessexdowns.org.uk/wp-content/uploads/2021/12/Biodiversity-farmland.pdf"
+    },
+    {
+     "label": "Berkshire Ornithological Club: morning walk at Bury Down (Nov 2022)",
+     "url": "https://berksoc.org.uk/publication/boc-morning-walk-at-bury-down-8th-november-2022/"
+    },
+    {
+     "label": "Wikipedia: Aston Upthorpe Downs",
+     "url": "https://en.wikipedia.org/wiki/Aston_Upthorpe_Downs"
+    },
+    {
+     "label": "Wikipedia: Letcombe Valley",
+     "url": "https://en.wikipedia.org/wiki/Letcombe_Valley"
+    },
+    {
+     "label": "BBOWT: Letcombe Valley nature reserve",
+     "url": "https://www.bbowt.org.uk/nature-reserves/letcombe-valley"
+    },
+    {
+     "label": "Natural England SSSI boundaries (England), queried around the parish",
+     "url": "https://environment.data.gov.uk/spatialdata/sites-of-special-scientific-interest-england/wms?service=WMS&request=GetCapabilities"
+    },
+    {
+     "label": "Xerces Society blog: English chalk grasslands (>80% lost over two centuries)",
+     "url": "https://www.xerces.org/blog/english-chalk-grasslands"
+    }
+   ],
+   "art": "section-living",
+   "check": "These are species recorded near or typical of the parish. A parish species list from the Thames Valley Environmental Records Centre would confirm them."
+  },
+  {
+   "id": "change",
+   "title": "The changing landscape",
+   "summary": "From ice-age valleys and ancient tracks to sheep walks, enclosure hedges, an airfield and a science campus.",
+   "body": [
+    "After the last ice age, woodland spread across the land. Over thousands of years people cleared much of the downs, and the open, grazed chalk country of barrows and tracks took shape along the Ridgeway.",
+    "By the Middle Ages the parish was a working balance of sheep on the downs, corn in the open fields and meadow in the vale, held by five manors. Enclosure in 1801 redrew the fields with straight hedges, and over the next two centuries farms on the downs grew larger.",
+    "The 20th century brought the biggest change. RAF Harwell was built in 1935 where three parishes met; about a third of the airfield lay in East Hendred. After the Second World War it became Britain's Atomic Energy Research Establishment, and today it is the Harwell Science and Innovation Campus, with over 6,000 people working on 280 hectares — its westernmost part still inside the parish.",
+    "In 1973 the Ridgeway became a National Trail, and the downs were later protected as part of the North Wessex Downs. The landscape you see is the product of all these layers at once."
+   ],
+   "lookFor": "From the Ridgeway near Scutchamer Knob, look east to the buildings of the Harwell Campus and north to the village and Vale. Then compare with the 1870s and 1920s maps in the app's Map tab (when available) to see which hedges, woods and roads are new.",
+   "issues": {
+    "title": "Growth and change",
+    "body": [
+     "New homes and jobs keep arriving around Didcot and the Harwell Campus, just beyond the parish. Decisions about where they go, and how water, traffic and habitats are handled, will shape the parish's next chapter.",
+     "Nature recovery, farming schemes and the National Landscape's management plan are the main tools for keeping the downs' character."
+    ]
+   },
+   "link": {
+    "label": "Explore the village's history at the Hendred Museum",
+    "url": "https://www.hendredmuseum.org.uk/"
+   },
+   "sources": [
+    {
+     "label": "Wikipedia: Berkshire Downs",
+     "url": "https://en.wikipedia.org/wiki/Berkshire_Downs"
+    },
+    {
+     "label": "Wikipedia: The Ridgeway",
+     "url": "https://en.wikipedia.org/wiki/The_Ridgeway"
+    },
+    {
+     "label": "Wikipedia: Harwell Science and Innovation Campus",
+     "url": "https://en.wikipedia.org/wiki/Harwell_Science_and_Innovation_Campus"
+    },
+    {
+     "label": "Wikipedia: East Hendred",
+     "url": "https://en.wikipedia.org/wiki/East_Hendred"
+    },
+    {
+     "label": "Victoria County History, Berkshire vol. 4 (1924), 'Parishes: East Hendred'",
+     "url": "https://www.british-history.ac.uk/vch/berks/vol4/pp294-302"
+    },
+    {
+     "label": "National Trails: The Ridgeway",
+     "url": "https://www.nationaltrail.co.uk/en_GB/trails/the-ridgeway/"
+    }
+   ],
+   "art": "section-change"
+  }
+ ],
+ "redKite": {
+  "title": "The return of the red kite",
+  "body": [
+   "Look up almost anywhere around East Hendred and you may see a big russet bird of prey with long angled wings and a deeply forked tail, tilting and twisting it as it steers. Thirty-odd years ago that would have been extraordinary.",
+   "In the Middle Ages red kites were common in England, even protected for cleaning up waste in towns. Later they were treated as vermin, with parishes paying bounties for them, and persecution and poisoning wiped them out across England. By the 20th century only a handful of pairs clung on in mid-Wales.",
+   "In 1989 the RSPB and the government's nature conservation agency (today's Natural England) began releasing young kites, first from Sweden and later from Spain, in the Chilterns on the Buckinghamshire–Oxfordshire border. About 90 birds were released there between 1989 and 1993. By 2002, 139 pairs were breeding, and the birds spread outwards across Oxfordshire, Berkshire and beyond.",
+   "By 2020 Natural England estimated about 1,800 breeding pairs in the UK, roughly 7% of the world population. In 1999 the BTO named the red kite its 'Bird of the Century'. In 2023 one of the very first reintroduced kites was found injured in Oxfordshire; it died aged 29.",
+   "Kites mostly scavenge — roadkill, carrion and earthworms — which makes them especially vulnerable to illegal poison baits. Some people also feed them in gardens, one reason they now drift over towns and villages."
+  ],
+  "lookFor": "Any time of year, often over the downs, the A417 and the village. Look for the forked tail, rusty red body and pale wing patches. They often drift low over fields and roadsides looking for food.",
+  "sources": [
+   {
+    "label": "Wikipedia: Red kite (UK reintroduction)",
+    "url": "https://en.wikipedia.org/wiki/Red_kite"
+   },
+   {
+    "label": "Natural England blog (21 July 2020): a conservation success story — red kites 30 years on",
+    "url": "https://naturalengland.blog.gov.uk/2020/07/21/a-conservation-success-story-the-reintroduction-of-red-kites-30-years-ago"
+   },
+   {
+    "label": "BTO BirdFacts: red kite",
+    "url": "https://www.bto.org/understanding-birds/birdfacts/red-kite"
+   }
+  ]
+ },
+ "species": [
+  {
+   "name": "Skylark",
+   "scientific": "Alauda arvensis",
+   "group": "Bird",
+   "habitat": "Open arable downs, Ridgeway",
+   "when": "Song from February to July; flocks in winter",
+   "art": "species-skylark"
+  },
+  {
+   "name": "Corn bunting",
+   "scientific": "Emberiza calandra",
+   "group": "Bird",
+   "habitat": "Open tops of the scarp along the Ridgeway",
+   "when": "All year; sings spring–summer"
+  },
+  {
+   "name": "Yellowhammer",
+   "scientific": "Emberiza citrinella",
+   "group": "Bird",
+   "habitat": "Hedgerows and field edges",
+   "when": "All year",
+   "art": "species-yellowhammer"
+  },
+  {
+   "name": "Meadow pipit",
+   "scientific": "Anthus pratensis",
+   "group": "Bird",
+   "habitat": "Downland, Ridgeway",
+   "when": "Commonest in autumn and winter"
+  },
+  {
+   "name": "Kestrel",
+   "scientific": "Falco tinnunculus",
+   "group": "Bird",
+   "habitat": "Hovering over verges and downs",
+   "when": "All year",
+   "art": "species-kestrel"
+  },
+  {
+   "name": "Grey partridge",
+   "scientific": "Perdix perdix",
+   "group": "Bird",
+   "habitat": "Arable downland",
+   "when": "All year"
+  },
+  {
+   "name": "Brown hare",
+   "scientific": "Lepus europaeus",
+   "group": "Mammal",
+   "habitat": "Big open arable fields",
+   "when": "All year; easiest to see Feb–April",
+   "art": "species-brown-hare"
+  },
+  {
+   "name": "Marbled white",
+   "scientific": "Melanargia galathea",
+   "group": "Butterfly",
+   "habitat": "Tall grassy banks and verges",
+   "when": "June–August",
+   "art": "species-marbled-white"
+  },
+  {
+   "name": "Common rock-rose",
+   "scientific": "Helianthemum nummularium",
+   "group": "Plant",
+   "habitat": "Chalk banks",
+   "when": "May–September",
+   "art": "species-rock-rose"
+  },
+  {
+   "name": "Wild thyme",
+   "scientific": "Thymus drucei",
+   "group": "Plant",
+   "habitat": "Short chalk turf",
+   "when": "June–September",
+   "art": "species-wild-thyme"
+  },
+  {
+   "name": "Knapweeds and scabiouses",
+   "scientific": "Centaurea spp., Scabiosa columbaria, Knautia arvensis",
+   "group": "Plant",
+   "habitat": "Verges, track banks",
+   "when": "June–September",
+   "art": "species-knapweed"
+  }
+ ],
+ "speciesFurther": "Also recorded on richer downs and in chalk streams nearby, but not confirmed in the parish: chalkhill and Adonis blue butterflies and horseshoe vetch on old chalk grassland, lapwings on open fields, and brown trout, bullheads and water voles in local chalk streams.",
+ "furtherAfield": [
+  {
+   "name": "Bury Down",
+   "why": "Ridgeway car park a few kilometres east: a good spot for skylarks and corn buntings.",
+   "url": "https://www.google.com/maps/search/?api=1&query=51.5535,-1.3105"
+  },
+  {
+   "name": "Aston Upthorpe Downs",
+   "why": "About 8 km east: the richest chalk downland nearby, with dry valleys and chalk flowers (a Site of Special Scientific Interest).",
+   "url": "https://www.google.com/maps/search/?api=1&query=51.55,-1.215"
+  },
+  {
+   "name": "Letcombe Valley nature reserve",
+   "why": "About 8 km west near Letcombe Regis: a chalk stream and grassland run by the Berkshire, Buckinghamshire and Oxfordshire Wildlife Trust.",
+   "url": "https://www.bbowt.org.uk/nature-reserves/letcombe-valley"
+  }
+ ],
+ "crossSection": {
+  "caption": "North to south, from the Vale to the Ridgeway: about 6 km. Heights exaggerated about 11 times.",
+  "accuracy": "Heights from satellite elevation data (±5–10 m). Rock boundaries are drawn schematically from the Victoria County History and the British Geological Survey’s district memoir, not read from a geological map.",
+  "label": "Cross-section through the parish from north to south: the clay Vale at about 87 metres; the village and church in the brook hollow at about 85 metres on the greensand spring line, where springs rise; the grey chalk shelf at 120 to 140 metres crossed by the Icknield Way; then the steep white chalk scarp up to the Ridgeway and Scutchamer Knob at 208 metres."
+ },
+ "openQuestions": [
+  "Where exactly are the springs that feed East Hendred Brook, and are any on public land?",
+  "Has the village flooded from the brook or from groundwater in living memory (e.g. 2007, 2014)? No published records were found.",
+  "Which local building stones are used in the village (clunch, flint, sarsen, greensand, brick)? The Conservation Area Appraisal has a section on this that couldn't be opened here.",
+  "Is the brook known locally as East Hendred Brook, Hendred Brook or Ginge Brook through the village? Maps disagree.",
+  "Are brown trout, bullhead or water voles in East Hendred Brook today?",
+  "Exact parish boundaries north and south (does the parish reach the Ridgeway along its whole southern edge?).",
+  "Is Diamond Jubilee Wood (and any other plantation) publicly accessible?",
+  "Does the village itself lie inside the North Wessex Downs National Landscape, or only the downs?",
+  "Golden Mile Row North/South are named woodland strips east of the village (OSM) — do they relate to the 'Golden Mile' cloth-fair legend?",
+  "Is there a parish species list available from TVERC to confirm which species to feature?"
+ ]
+}

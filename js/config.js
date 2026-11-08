@@ -31,8 +31,27 @@ export const MAP_LAYERS = [
   { id: "1761", name: "1761", full: "1761: John Rocque’s Berkshire", swatch: "#b0473a",
     title: "Rocque’s Survey of Berkshire, 1761", credit: "Before enclosure: the open-field strips", kind: "tiles",
     url: "", maxZoom: 17, attribution: "",
-    missing: "Needs a scan lined up with today’s map" }
+    missing: "Needs a scan lined up with today’s map" },
+  // Overlays: a semi-transparent WMS layer drawn over today's OpenStreetMap.
+  { id: "habitats", name: "Habitats", full: "Habitats: Natural England priority habitats", swatch: "#7f9a65",
+    title: "Priority habitats · © Natural England, OGL", credit: "© Natural England · Open Government Licence", kind: "overlay",
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19,
+    wms: { url: "https://environment.data.gov.uk/spatialdata/priority-habitat-inventory-england/wms",
+      layers: "Priority_Habitat_Inventory_England", opacity: 0.65 },
+    attribution: '&copy; Natural England copyright. Contains Ordnance Survey data &copy; Crown copyright and database right 2026. <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL v3</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' },
+  // British Geological Survey 1:625,000 bedrock geology (Open Government Licence).
+  // The BGS map server couldn't be reached while building this, so the layer name is
+  // unconfirmed: check GetCapabilities, then delete `disabled` and `missing`.
+  { id: "geology", name: "Geology", full: "Rocks: BGS geology, 1:625,000", swatch: "#c9b98a",
+    title: "Bedrock geology · Contains British Geological Survey materials © UKRI", credit: "British Geological Survey · Open Government Licence", kind: "overlay",
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19,
+    wms: { url: "https://ogc.bgs.ac.uk/cgi-bin/BGS_Bedrock_and_Superficial_Geology/ows", layers: "GBR_BGS_625k_BLS", opacity: 0.6 },
+    attribution: 'Contains <a href="https://www.bgs.ac.uk/">British Geological Survey</a> materials &copy; UKRI 2026. <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL v3</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    disabled: true, missing: "Coming soon: the geology map server still needs checking" }
 ];
+
+// A layer is usable when it has tiles and isn't switched off.
+export const layerReady = (l) => l.kind === "painted" || (!!l.url && !l.disabled);
 
 // Centre of the village, for the real-map views.
 export const VILLAGE_CENTRE = [51.5955, -1.3372];

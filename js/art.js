@@ -1,6 +1,7 @@
 // Ink-and-watercolour illustrations, drawn in SVG.
 // Each one can be swapped for a hand-painted scan via ART_IMAGES in config.js.
 import { ART_IMAGES } from "./config.js";
+import { LAND_DRAWINGS } from "./land-art.js";
 
 const W = 'filter="url(#wc)" style="mix-blend-mode:multiply"';
 const I = 'filter="url(#ink)" fill="none" stroke="#2b2924" stroke-linecap="round" stroke-linejoin="round"';
@@ -107,7 +108,7 @@ export function art(key, { width, height, className = "" } = {}) {
   if (ART_IMAGES[key]) {
     return `<img src="${ART_IMAGES[key]}" alt="" class="art ${className}" ${size} loading="lazy" decoding="async">`;
   }
-  const d = DRAWINGS[key];
+  const d = DRAWINGS[key] || LAND_DRAWINGS[key];
   if (!d) return "";
   return `<svg viewBox="${d.vb}" class="art ${className}" ${size} aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMax meet">${d.svg}</svg>`;
 }

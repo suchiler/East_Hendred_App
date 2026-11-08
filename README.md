@@ -109,6 +109,35 @@ Stories with coordinates also appear as pins on the map: blue for history and me
 
 **Getting the NLS key:** email **maps@nls.uk** and explain that this is a free, non-commercial community app for East Hendred, or use their Historic Maps subscription through MapTiler. Paste the key into `MAPTILER_KEY` in **`js/config.js`**. Before going live, check the tileset IDs in that file against MapTiler's NLS catalogue. The credit "Courtesy of the National Library of Scotland" is already shown.
 
+## Land page
+
+The **Land** tab covers the parish's rocks, the shape of the land, the Ridgeway, water, soils and farming, wildlife and how the landscape has changed. Each section ends with a "Look for" note, a "Current issues" panel and one link for further reading or action.
+
+- **Content:** everything is in **`content/land.json`**: the intro, the "Before people" deep-time strip, the seven sections, the red kite panel, the species list, "Further afield" and the cross-section caption. Edit the text there. A section's `place` links it to a map pin, and `check` shows a "Still to check" note in its sources.
+- **Map pins:** the nature places (Ridgeway car park, the Ridgeway at East Hendred Down, the Icknield Way crossing, the brook at Ford Lane) are `NATURE_SITES` in **`js/data.js`**. Only public places are pinned, and rare or protected species are never given locations.
+- **Map layers** (in "Choose a map", drawn over today's OpenStreetMap):
+
+  | Layer | Status | Licence and credit |
+  |---|---|---|
+  | Habitats: Natural England Priority Habitat Inventory | ✅ Works (checked) | Open Government Licence v3. "© Natural England copyright. Contains Ordnance Survey data © Crown copyright and database right." |
+  | Rocks: British Geological Survey 1:625,000 geology | ⏳ Disabled | Open Government Licence. "Contains British Geological Survey materials © UKRI." The BGS map server couldn't be reached while building, so the layer name `GBR_BGS_625k_BLS` is unconfirmed. Check it with a GetCapabilities request to `https://ogc.bgs.ac.uk/cgi-bin/BGS_Bedrock_and_Superficial_Geology/ows`, then remove `disabled` and `missing` from the `geology` entry in `js/config.js`. |
+
+  The more detailed BGS 1:50,000 geology isn't included: its data is commercially licensed, so ask BGS first.
+- **Illustrations:** the cross-section and vignettes are in **`js/land-art.js`**. To use hand-painted scans, add them to `ART_IMAGES` in `js/config.js` with these keys: `cross-section`, `section-rocks`, `section-shape`, `section-ridgeway`, `section-water`, `section-soils`, `section-living`, `section-change`, `red-kite`, `species-skylark`, `species-yellowhammer`, `species-kestrel`, `species-brown-hare`, `species-marbled-white`, `species-rock-rose`, `species-wild-thyme`, `species-knapweed`, `fossil-urchin`. Paint the cross-section to the same frame as the drawing (640 × 230), so the labels still line up, or bake the labels into the painting.
+
+**Questions only a local can answer** (from the research):
+
+- [ ] Where exactly are the springs that feed East Hendred Brook, and are any on public land?
+- [ ] Has the village flooded from the brook or from groundwater in living memory (e.g. 2007, 2014)? No published records were found.
+- [ ] Which local building stones are used in the village (clunch, flint, sarsen, greensand, brick)? The Conservation Area Appraisal has a section on this that couldn't be opened here.
+- [ ] Is the brook known locally as East Hendred Brook, Hendred Brook or Ginge Brook through the village? Maps disagree.
+- [ ] Are brown trout, bullhead or water voles in East Hendred Brook today?
+- [ ] Exact parish boundaries north and south (does the parish reach the Ridgeway along its whole southern edge?).
+- [ ] Is Diamond Jubilee Wood (and any other plantation) publicly accessible?
+- [ ] Does the village itself lie inside the North Wessex Downs National Landscape, or only the downs?
+- [ ] Golden Mile Row North/South are named woodland strips east of the village (OSM) — do they relate to the 'Golden Mile' cloth-fair legend?
+- [ ] Is there a parish species list available from TVERC to confirm which species to feature?
+
 ## Hand-painted artwork
 
 The illustrations are drawn in code, in an ink-and-watercolour style. To use real paintings:

@@ -1,8 +1,8 @@
 // The map view: the painted village map (from js/painted-map.js), plus real tiled
 // maps (today and historic) through Leaflet. Sites and stories are placed from their
 // lat/lng; anything beyond the drawing gets a marker at the edge pointing to it.
-import { SITES, ENTRIES } from "./data.js";
-import { MAP_LAYERS, VILLAGE_CENTRE } from "./config.js";
+import { SITES, ENTRIES, NATURE_SITES } from "./data.js";
+import { MAP_LAYERS, VILLAGE_CENTRE, layerReady } from "./config.js";
 import { MAP_W, MAP_H, project, PAINTED_SVG } from "./painted-map.js";
 import { loadStories, isFolklore, typeName } from "./stories.js";
 import { esc } from "./util.js";
@@ -16,6 +16,11 @@ const SHEET_RESERVE = 236 + 52; // place sheet + pill row, measured from the bot
 function siteItems() {
   return SITES.map((s) => ({ key: `site:${s.id}`, kind: "site", id: s.id, n: s.n, name: s.name, short: s.short, lat: s.lat, lng: s.lng, site: s }));
 }
+function natureItems() {
+  return NATURE_SITES.map((s) => ({ key: `nature:${s.id}`, kind: "nature", id: s.id, name: s.name, short: s.short, lat: s.lat, lng: s.lng, place: s }));
+}
+const LEAF = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15"/><path d="M5 19 13 11"/></svg>';
+const RANK = { site: 0, nature: 1, story: 2 };
 function storyItems(stories) {
   return stories.filter((s) => Array.isArray(s.coordinates) && s.coordinates.length === 2)
     .map((s) => ({ key: `story:${s.id}`, kind: "story", id: s.id, name: s.title, short: s.title,
@@ -28,9 +33,9 @@ export function mapView(root, { sel } = {}) {
     wanted: sel || "champs",
     layer: localStorage.getItem("eh.layer") || "painted",
     menu: false,
-    items: siteItems()
+    items: [...siteItems(), ...natureItems()]
   };
-  if (!MAP_LAYERS.find((l) => l.id === state.layer && (l.kind === "painted" || l.url))) state.layer = "painted";
+  if (!MAP_LAYERS.find((l) => l.id === state.layer && layerReady(l))) state.layer = "painted";
 
   root.innerHTML = `
     <section class="map" aria-labelledby="map-h">
@@ -78,7 +83,7 @@ export function mapView(root, { sel } = {}) {
         </div>
         <ul class="layer-list">
           ${MAP_LAYERS.map((l) => {
-            const ready = l.kind === "painted" || !!l.url;
+            const ready = layerReady(l);
             return `<li><button type="button" class="layer-row" data-layer="${l.id}" ${ready ? "" : "disabled"} aria-pressed="false">
               <span class="swatch" style="background:${l.swatch}"></span>
               <span class="layer-text"><span class="layer-full">${esc(l.full)}</span>
@@ -93,7 +98,7 @@ export function mapView(root, { sel } = {}) {
   const $ = (q) => root.querySelector(q);
   const canvas = $(".map-canvas"), stage = $(".map-stage"), leafletEl = $(".map-leaflet");
   const pinsEl = $(".pins");
-  let lmap = null, tiles = null, you = null;
+  let lmap = null, tiles = null, overlay = null, you = null;
   let markers = {};
   // Painted map view: base cover scale, zoom factor and offset (screen px).
   const view = { base: 1, z: 1, dx: 0, dy: 0, ready: false };
@@ -107,10 +112,11 @@ export function mapView(root, { sel } = {}) {
   };
 
   function clampView() {
-    const { W, H } = visible();
+    const { W, H, b } = visible();
     const w = MAP_W * S(), h = MAP_H * S();
     view.dx = w <= W ? (W - w) / 2 : Math.min(0, Math.max(W - w, view.dx));
-    view.dy = h <= H ? (H - h) / 2 : Math.min(0, Math.max(H - h, view.dy));
+    // The map's bottom edge may rise to the top of the place sheet, so places near it aren't hidden.
+    view.dy = h <= H ? (H - h) / 2 : Math.min(0, Math.max(Math.min(H, b) - h, view.dy));
   }
 
   function centreOn(lat, lng) {
@@ -157,13 +163,13 @@ export function mapView(root, { sel } = {}) {
     const placed = [];
     offMap = [];
     const html = [];
-    const ordered = [...state.items].sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "site" ? -1 : 1));
+    const ordered = [...state.items].sort((a, b) => RANK[a.kind] - RANK[b.kind]);
     for (const it of ordered) {
       const p = project(it.lat, it.lng);
       it.inside = p.inside;
       if (!p.inside) { offMap.push({ ...it, p }); it.sx = undefined; continue; }
       let x = view.dx + p.x * s, y = view.dy + p.y * s;
-      if (it.kind === "story") {
+      if (it.kind !== "site") {
         const ox = x, oy = y;
         for (let k = 0; k < 12 && placed.some((q) => Math.hypot(q.x - x, q.y - y) < 30); k++) {
           const a = (k * 60 + 30) * Math.PI / 180, r = 32 + 12 * Math.floor(k / 6);
@@ -176,6 +182,9 @@ export function mapView(root, { sel } = {}) {
       if (it.kind === "site") {
         html.push(`<button type="button" class="pin${on ? " on" : ""}" data-key="${it.key}" style="left:${x - 22}px;top:${y - 22}px"
           aria-label="${it.n}. ${esc(it.name)}" aria-pressed="${on}"><span>${it.n}</span></button>`);
+      } else if (it.kind === "nature") {
+        html.push(`<button type="button" class="npin${on ? " on" : ""}" data-key="${it.key}" style="left:${x - 20}px;top:${y - 20}px"
+          aria-label="Nature: ${esc(it.name)}" aria-pressed="${on}"><span>${LEAF}</span></button>`);
       } else {
         html.push(`<button type="button" class="spin${it.folk ? " folk" : ""}${on ? " on" : ""}" data-key="${it.key}" style="left:${x - 20}px;top:${y - 20}px"
           aria-label="${esc(typeLabel(it.story.type))}: ${esc(it.name)}" aria-pressed="${on}"><span>${it.folk ? "‡" : ""}</span></button>`);
@@ -220,16 +229,20 @@ export function mapView(root, { sel } = {}) {
     const edges = $(".edge-markers"), bottom = $(".bottom-edges");
     edges.innerHTML = ""; bottom.innerHTML = "";
     if (stage.hidden) return;
-    const groups = {};
-    for (const it of offMap) (groups[`${it.lat.toFixed(3)},${it.lng.toFixed(3)}`] ||= []).push(it);
+    // Group off-map places within about 600 m of each other into one marker.
+    const groups = [];
+    for (const it of [...offMap].sort((a, b) => RANK[a.kind] - RANK[b.kind])) {
+      const g = groups.find((x) => distanceKm([x[0].lat, x[0].lng], [it.lat, it.lng]) < 0.6);
+      if (g) g.push(it); else groups.push([it]);
+    }
     const v = visible();
     const R = { l: 12, r: v.W - 60, t: v.t + 12, b: v.b - 8 };
     const cx = (R.l + R.r) / 2, cy = (R.t + R.b) / 2;
     const s = S();
-    Object.values(groups).forEach((g) => {
+    groups.forEach((g) => {
       const lead = g.find((i) => i.kind === "site") || g[0];
       const label = lead.short;
-      const extra = g.length > 1 ? `, and ${g.length - 1} more ${g.length === 2 ? "story" : "stories"} there` : "";
+      const extra = g.length > 1 ? `, and ${g.length - 1} more ${g.length === 2 ? "place" : "places"} nearby` : "";
       const vx = view.dx + lead.p.x * s - cx, vy = view.dy + lead.p.y * s - cy;
       const angle = Math.atan2(vx, -vy) * 180 / Math.PI;
       const tx = vx ? ((vx > 0 ? R.r : R.l) - cx) / vx : Infinity;
@@ -304,8 +317,8 @@ export function mapView(root, { sel } = {}) {
     Object.values(markers).forEach((m) => lmap.removeLayer(m));
     markers = {};
     for (const it of state.items) {
-      const html = it.kind === "site"
-        ? `<span class="lpin">${it.n}</span>`
+      const html = it.kind === "site" ? `<span class="lpin">${it.n}</span>`
+        : it.kind === "nature" ? `<span class="lnpin">${LEAF}</span>`
         : `<span class="lspin${it.folk ? " folk" : ""}">${it.folk ? "‡" : ""}</span>`;
       const size = it.kind === "site" ? 32 : 26;
       const icon = L.divIcon({ className: "", html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
@@ -319,12 +332,14 @@ export function mapView(root, { sel } = {}) {
     if (lmap || !window.L) return;
     lmap = L.map(leafletEl, { zoomControl: false, attributionControl: true }).setView(VILLAGE_CENTRE, 16);
     L.control.zoom({ position: "topright" }).addTo(lmap);
+    const it = state.items.find((x) => x.key === state.sel);
+    if (it) lmap.setView([it.lat, it.lng], 16);
     addLeafletMarkers();
   }
 
   function setLayer(id) {
     const l = MAP_LAYERS.find((x) => x.id === id);
-    if (!l || (l.kind !== "painted" && !l.url)) return;
+    if (!l || !layerReady(l)) return;
     state.layer = id;
     try { localStorage.setItem("eh.layer", id); } catch { /* ignore */ }
     const painted = l.kind === "painted";
@@ -335,7 +350,12 @@ export function mapView(root, { sel } = {}) {
       ensureLeaflet();
       if (lmap) {
         if (tiles) lmap.removeLayer(tiles);
-        tiles = L.tileLayer(l.url, { maxZoom: l.maxZoom || 18, attribution: l.attribution }).addTo(lmap);
+        if (overlay) { lmap.removeLayer(overlay); overlay = null; }
+        tiles = L.tileLayer(l.url, { maxZoom: l.maxZoom || 18, attribution: l.wms ? "" : l.attribution }).addTo(lmap);
+        if (l.wms) {
+          overlay = L.tileLayer.wms(l.wms.url, { layers: l.wms.layers, format: "image/png", transparent: true,
+            opacity: l.wms.opacity ?? 0.6, maxZoom: l.maxZoom || 18, attribution: l.attribution }).addTo(lmap);
+        }
         setTimeout(() => lmap.invalidateSize(), 0);
       }
     }
@@ -364,7 +384,7 @@ export function mapView(root, { sel } = {}) {
     const it = state.items.find((x) => x.key === state.sel) || state.items[0];
     if (!it) return;
     state.sel = it.key;
-    root.querySelectorAll(".pin, .spin, .edge").forEach((p) => {
+    root.querySelectorAll(".pin, .spin, .npin, .edge").forEach((p) => {
       const on = p.dataset.key === it.key;
       p.classList.toggle("on", on);
       if (!p.classList.contains("edge")) p.setAttribute("aria-pressed", String(on));
@@ -379,6 +399,12 @@ export function mapView(root, { sel } = {}) {
       sub = e ? `${esc(e.date)}. ${esc(e.title)}` : "";
       text = it.site.spot;
       link = `#/entry/${it.site.entry}`;
+    } else if (it.kind === "nature") {
+      const p = it.place;
+      head = `<span class="num nature" aria-hidden="true">${LEAF}</span>`;
+      sub = esc(p.kind);
+      text = `${p.why} ${p.access || ""}`.trim();
+      link = `#/land/${p.section}`;
     } else {
       const s = it.story;
       head = `<span class="num story${it.folk ? " folk" : ""}" aria-hidden="true">${it.folk ? "‡" : "¶"}</span>`;
@@ -397,7 +423,7 @@ export function mapView(root, { sel } = {}) {
       </div>
       <p class="place-spot">${esc(text)}</p>
       <div class="actions">
-        <a class="btn" href="${link}">Read the story</a>
+        <a class="btn" href="${link}">${it.kind === "nature" ? "Read about it" : "Read the story"}</a>
         <a class="link" href="${dir}" target="_blank" rel="noopener">Directions</a>
       </div>`;
   }
@@ -451,7 +477,7 @@ export function mapView(root, { sel } = {}) {
   // Route argument: a site id, or a story id.
   const pickWanted = () => {
     const w = state.wanted;
-    const hit = state.items.find((i) => i.key === `site:${w}`) || state.items.find((i) => i.key === `story:${w}`);
+    const hit = state.items.find((i) => i.key === `site:${w}`) || state.items.find((i) => i.key === `nature:${w}`) || state.items.find((i) => i.key === `story:${w}`);
     if (hit) state.sel = hit.key;
     else if (!state.sel) state.sel = state.items[0].key;
   };
@@ -463,7 +489,7 @@ export function mapView(root, { sel } = {}) {
   let alive = true;
   loadStories().then((stories) => {
     if (!alive) return;
-    state.items = [...siteItems(), ...storyItems(stories)];
+    state.items = [...siteItems(), ...natureItems(), ...storyItems(stories)];
     const before = state.sel;
     pickWanted();
     if (state.sel !== before) {
