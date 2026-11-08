@@ -14,16 +14,16 @@ export const ERAS = [
 // Newest first: the timeline starts at the surface and digs down.
 export const ENTRIES = [
   { id: "clock-500", era: "atom", date: "2025", title: "The clock turns 500", gloss: "Clock500 tower tours",
-    body: "The village celebrated the clock’s 500th birthday with tower tours. It was last overhauled in 1961 and still keeps good time.",
+    body: "The village celebrated the clock’s 500th birthday with tower tours. It was overhauled in 1961 and restored again in 2024, and still keeps good time.",
     spot: "Check the church’s events page for future tower tours.", site: "church", art: "tower" },
   { id: "oxfordshire", era: "atom", date: "1974", title: "Berkshire to Oxfordshire", gloss: "A thousand years in one county ends",
     body: "Local government reorganisation moved the village out of Berkshire, which it had belonged to for a thousand years, and into Oxfordshire.",
     spot: "Old maps and guidebooks still list it under Berkshire." },
   { id: "harwell", era: "atom", date: "1946", title: "The atom next door", gloss: "Harwell, and William Penney",
-    body: "Britain’s atomic research centre opened on the airfield at neighbouring Harwell, and the western edge of today’s Harwell Science and Innovation Campus lies inside the parish. Physicist William Penney, a leader of Britain’s nuclear weapons programme, lived on Cat Street from 1963 until his death in 1991. He took the title Baron Penney of East Hendred.",
-    spot: "A blue plaque marks his house, Orchard House, on Cat Street.", site: "orchard" },
+    body: "Britain’s atomic research centre opened on the airfield at neighbouring Harwell, and the western edge of today’s Harwell Science and Innovation Campus lies inside the parish. Physicist William Penney, a leader of Britain’s nuclear weapons programme, lived at Orchard House on Cat Street until his death in 1991. He took the title Baron Penney of East Hendred.",
+    spot: "A blue plaque, unveiled in 2014, marks his house, Orchard House, on Cat Street. It’s a private home, so view it from the street.", site: "orchard" },
   { id: "eyston-speed", era: "atom", date: "1930s", title: "The fastest man on Earth", gloss: "Captain George Eyston",
-    body: "A son of the manor, Captain George Eyston held the world land speed record in the late 1930s.",
+    body: "Captain George Eyston, born at Bampton into the family whose seat was Hendred House, held the world land speed record in the late 1930s.",
     spot: "A good story for the Eyston Arms.", site: "eyston-arms" },
   { id: "st-marys", era: "mod", date: "1865", title: "A Catholic church at last", gloss: "St Mary’s, High Street",
     body: "The Eystons built St Mary’s Catholic church, designed by Charles Alban Buckler and linked to its presbytery by a timber gallery. After three centuries of private worship, the village’s Catholics had a public church.",
@@ -32,7 +32,7 @@ export const ENTRIES = [
     body: "An Act of 1801 enclosed the western open fields, replacing medieval strips with hedged fields. Some charity land for the poor was swapped for a plot in ‘Alley Green Furlong’.",
     spot: "The straight hedgerows north and west of the village date from this era." },
   { id: "woodward", era: "mod", date: "1753", title: "A parson’s letters", gloss: "Revd George Woodward",
-    body: "Rector George Woodward wrote vivid letters from East Hendred between 1753 and 1761, later published as ‘A Parson in the Vale of White Horse’. They’re a rare everyday view of 18th-century village life.",
+    body: "Rector George Woodward, who served the parish until his death on 5 May 1790, wrote letters to his uncle from East Hendred between 1753 and 1761. They were later published as ‘A Parson in the Vale of White Horse’, and give a rare, informal view of a Georgian parson’s household.",
     spot: "The rectory opposite the church was his home.", site: "church" },
   { id: "ransacked", era: "ref", date: "1688", title: "Restored, then ransacked", gloss: "The Glorious Revolution",
     body: "St Amand’s Chapel was restored in 1687 under the Catholic King James II. The next year, William III’s Protestant army passed through and wrecked it. It was repaired soon after.",
@@ -48,7 +48,7 @@ export const ENTRIES = [
     body: "Sheen Priory was dissolved and its East Hendred estate passed to the Crown, which is why it’s still called the King’s Manor. The monks’ chapel was sold off and later used as a pigeon-house, bakehouse and wash-house by the Champ family, who gave it its nickname.",
     spot: "Look at the chapel’s west end, where an upper floor was inserted.", site: "kings-manor" },
   { id: "clock", era: "med", date: "1525", title: "A clock without a face", gloss: "John Seymour of Wantage",
-    body: "Seymour built the church clock in 1525. It has no dial and no hands: it tells the time by its bells alone, and every three hours from nine in the morning it plays a hymn tune, the Angels’ Song. It is thought to be one of the oldest clocks in Britain still in its original place, and it is still wound by hand every day.",
+    body: "Seymour built the church clock in 1525. It has no dial and no hands: it tells the time by its bells alone, and every three hours from nine in the morning it plays a hymn tune, the Angels’ Song. It is thought to be one of the oldest clocks in Britain still in its original place. It was overhauled in 1961 and restored again in 2024.",
     spot: "Stand in St Augustine’s churchyard at 9am, noon, 3pm or 6pm to hear it play.", site: "church", art: "tower", clock: true,
     sources: "Victoria County History of Berkshire, vol. 4; Hendred Museum; Historic England listing for the Church of St Augustine." },
   { id: "champs-chapel", era: "med", date: "1453", title: "The Chapel of Jesus of Bethlehem", gloss: "Champs Chapel",
@@ -88,26 +88,27 @@ export const ENTRIES = [
     spot: "Walk south up the downs to join the Ridgeway National Trail.", site: "knob" }
 ];
 
-// x/y place each site on the painted map (a 390×757 drawing).
-// lat/lng are APPROXIMATE (TODO: confirm each on the ground or from OS data).
+// lat/lng from OpenStreetMap building outlines and Historic England listings (Nov 2026).
+// TODO: ground-check the mill (Mills Archive grid ref; a postcode source differs by ~150 m).
+// The painted map places sites from these coordinates automatically (js/painted-map.js).
 export const SITES = [
-  { id: "church", n: 1, name: "St Augustine’s Church", short: "St Augustine’s", x: 251, y: 334, lat: 51.5899, lng: -1.3338, entry: "clock",
+  { id: "church", n: 1, name: "St Augustine’s Church", short: "St Augustine’s", lat: 51.5945, lng: -1.3383, entry: "clock",
     spot: "Hear the faceless clock play at 9am, noon, 3pm or 6pm. The wool merchants’ brasses are in the north transept." },
-  { id: "champs", n: 2, name: "Champs Chapel", short: "Champs Chapel", x: 179, y: 358, lat: 51.5893, lng: -1.3362, entry: "champs-chapel",
+  { id: "champs", n: 2, name: "Champs Chapel", short: "Champs Chapel", lat: 51.597, lng: -1.3366, entry: "champs-chapel",
     spot: "Built by the Sheen monks, later a pigeon-house and bakehouse. Now the Hendred Museum, open weekend afternoons in season." },
-  { id: "kings-manor", n: 3, name: "King’s Manor", short: "King’s Manor", x: 124, y: 280, lat: 51.5912, lng: -1.3381, entry: "carthusians",
+  { id: "kings-manor", n: 3, name: "King’s Manor", short: "King’s Manor", lat: 51.5964, lng: -1.3368, entry: "carthusians",
     spot: "A timber-framed house with its original gatehouse, given to the Carthusians of Sheen by Henry V." },
-  { id: "hendred-house", n: 4, name: "Hendred House & St Amand’s", short: "Hendred House", x: 220, y: 276, lat: 51.5913, lng: -1.3349, entry: "st-amand",
+  { id: "hendred-house", n: 4, name: "Hendred House & St Amand’s", short: "Hendred House", lat: 51.5946, lng: -1.336, entry: "st-amand",
     spot: "Home of the Eystons since the 1440s. A private house: the chapel opens on occasional open days." },
-  { id: "st-marys", n: 5, name: "St Mary’s Catholic Church", short: "St Mary’s", x: 309, y: 260, lat: 51.5917, lng: -1.3318, entry: "st-marys",
+  { id: "st-marys", n: 5, name: "St Mary’s Catholic Church", short: "St Mary’s", lat: 51.5938, lng: -1.3363, entry: "st-marys",
     spot: "Designed by Charles Alban Buckler and linked to its presbytery by a timber gallery." },
-  { id: "eyston-arms", n: 6, name: "The Eyston Arms", short: "Eyston Arms", x: 339, y: 356, lat: 51.5894, lng: -1.3307, entry: "eystons",
+  { id: "eyston-arms", n: 6, name: "The Eyston Arms", short: "Eyston Arms", lat: 51.5962, lng: -1.3362, entry: "eystons",
     spot: "Named after the family at Hendred House. Ask about Captain George Eyston’s land speed record." },
-  { id: "orchard", n: 7, name: "Orchard House, Cat Street", short: "Orchard House", x: 75, y: 388, lat: 51.5886, lng: -1.3399, entry: "harwell",
+  { id: "orchard", n: 7, name: "Orchard House, Cat Street", short: "Orchard House", lat: 51.5966, lng: -1.3382, entry: "harwell",
     spot: "A blue plaque marks the home of William Penney, Baron Penney of East Hendred." },
-  { id: "mill", n: 8, name: "Mill by Ludbridge", short: "Ludbridge Mill", x: 320, y: 190, lat: 51.5935, lng: -1.3312, entry: "domesday",
+  { id: "mill", n: 8, name: "Mill by Ludbridge", short: "Ludbridge Mill", lat: 51.6025, lng: -1.3444, entry: "domesday",
     spot: "The mill on the brook stands where a Domesday mill probably stood." },
-  { id: "knob", n: 9, name: "Scutchamer Knob & the Ridgeway", short: "Scutchamer Knob", offMap: true, lat: 51.5575, lng: -1.3380, entry: "cwichelm",
+  { id: "knob", n: 9, name: "Scutchamer Knob & the Ridgeway", short: "Scutchamer Knob", lat: 51.5624, lng: -1.3428, entry: "cwichelm",
     spot: "South of the village, up on the downs. The mound sits in woodland just off the Ridgeway National Trail." }
 ];
 
@@ -121,49 +122,22 @@ export const WALK = {
   ],
   stops: [
     { site: "church", entry: "clock", getThere: "Start in the churchyard.",
-      look: "the medieval lectern inside: a carved foot standing on three winged beasts.", sx: 224, sy: 100 },
+      look: "the medieval lectern inside: a carved foot standing on three winged beasts." },
     { site: "champs", entry: "champs-chapel", getThere: null,
-      look: "the west end, where the Champ family inserted an upper floor.", sx: 160, sy: 113 },
+      look: "the west end, where the Champ family inserted an upper floor." },
     { site: "kings-manor", entry: "carthusians", getThere: null,
-      look: "the original gatehouse of the timber-framed manor.", sx: 110, sy: 70 },
+      look: "the original gatehouse of the timber-framed manor." },
     { site: "hendred-house", entry: "st-amand", getThere: null,
-      look: "the house from the High Street. It’s a private home, with St Amand’s Chapel inside.", sx: 196, sy: 68 },
+      look: "the house from the High Street. It’s a private home, with St Amand’s Chapel inside." },
     { site: "st-marys", entry: "st-marys", getThere: null,
-      look: "the timber gallery linking church and presbytery.", sx: 276, sy: 60 },
+      look: "the timber gallery linking church and presbytery." },
     { site: "eyston-arms", entry: "eystons", getThere: null,
-      look: "the pub sign, named for the family at Hendred House. Then ask about Captain George Eyston’s land speed record.", sx: 302, sy: 112 },
+      look: "the pub sign, named for the family at Hendred House. Then ask about Captain George Eyston’s land speed record." },
     { site: "orchard", entry: "harwell", getThere: null,
-      look: "the blue plaque for William Penney.", sx: 66, sy: 130 },
+      look: "the blue plaque for William Penney." },
     { site: "mill", entry: "domesday", getThere: null,
-      look: "the brook and the mill, on the site of a Domesday mill worth 20 shillings.", sx: 285, sy: 21 }
+      look: "the brook and the mill, on the site of a Domesday mill worth 20 shillings." }
   ]
 };
 
-export const STORY_FILTERS = [["all", "All"], ["work", "Work & shops"], ["school", "School"], ["church", "Church"], ["c20", "20th century"]];
-
-export const STORIES = [
-  { art: "story-anvil", cat: "work", title: "Generations at the forge", who: "The blacksmiths of Harrison’s Forge, 1920s",
-    text: "Generations of blacksmiths ran the village forge. They didn’t just shoe horses: they made cart wheels, gates and ironmongery for the whole village. A photograph from 1926 shows the blacksmith at Harrison’s Forge.",
-    source: "East Hendred Bulletin, Spring 2016" },
-  { art: "story-label", cat: "c20", title: "The day the evacuees came", who: "Boys of Cave Road School, West Ham, 1 September 1939",
-    text: "Two days before war was declared, a party of London children arrived in the village, among them boys from Cave Road School in West Ham. Decades later the Bulletin was still asking former evacuees to get in touch for a reunion.",
-    source: "East Hendred Bulletin, Summer 2004" },
-  { art: "story-slate", cat: "school", title: "Lessons at Snells Hall", who: "Stan Francis and Robin Hine, pupils",
-    text: "Snells Hall was the village school from 1860 to 1967. Stan Francis started there in 1933. Robin Hine remembers how school life changed when war came and the evacuees arrived.",
-    source: "East Hendred Bulletin, Winter 2015" },
-  { art: "story-jar", cat: "work", title: "Halfpennies at Wilkins", who: "Wilkins Shop, in living memory",
-    text: "Older villagers still remember spending their halfpennies at Wilkins Shop. Later there was a shop where you could get your horse shod, your wireless accumulator charged and your bike brakes fixed.",
-    source: "East Hendred Bulletin, Winter 2015 and Spring 2016" },
-  { art: "story-plane", cat: "work", title: "A family of carpenters", who: "Joseph Hunt, born 1771",
-    text: "Joseph Hunt was born in East Hendred in 1771. He was the first of several generations of Hunts to appear in the village records as carpenters.",
-    source: "The Hunts of East Hendred, family history" },
-  { art: "story-quill", cat: "church", title: "The parson who wrote home", who: "Revd George Woodward, rector 1753–61",
-    text: "From the rectory opposite the church, Woodward wrote long letters to a relative about himself, his parish and his neighbours, with a wry sense of humour. They were published in 1982.",
-    source: "A Parson in the Vale of White Horse, ed. Donald Gibson (1982)" },
-  { art: "story-bell", cat: "church", title: "Keeping the faceless clock", who: "Arthur Harrison, who overhauled it in 1961",
-    text: "The 1525 clock is wound by hand every day and plays the Angels’ Song every three hours from nine. Arthur Harrison overhauled it in 1961, and it still keeps very good time.",
-    source: "Hendred Museum; Berkshire History" },
-  { art: "story-house", cat: "c20", title: "The physicist on Cat Street", who: "William Penney, Baron Penney of East Hendred, 1963–91",
-    text: "A leader of Britain’s atomic programme at neighbouring Harwell, Penney lived at Orchard House on Cat Street for nearly thirty years and took the village’s name for his title.",
-    source: "Historic England; blue plaque on Orchard House" }
-];
+// Stories and legends now live in content/stories.json, published from the Stories spreadsheet.

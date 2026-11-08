@@ -1,7 +1,7 @@
 // Offline support: the app itself is cached on first visit; map tiles are cached
 // as you look at them (up to a limit), so the village maps keep working on a walk
 // with poor signal.
-const VERSION = "eh-v1";
+const VERSION = "eh-v2";
 const SHELL = [
   "./",
   "index.html",
@@ -14,6 +14,9 @@ const SHELL = [
   "js/data.js",
   "js/config.js",
   "js/util.js",
+  "js/stories.js",
+  "js/painted-map.js",
+  "content/stories.json",
   "vendor/leaflet/leaflet.js",
   "vendor/leaflet/leaflet.css",
   "manifest.webmanifest",
@@ -68,6 +71,20 @@ self.addEventListener("fetch", (e) => {
       const res = await fetch(req);
       if (res.ok || res.type === "opaque") c.put(req, res.clone());
       return res;
+    }));
+    return;
+  }
+
+  // Stories: fetch fresh when online, so newly published stories appear; fall back offline.
+  if (url.origin === self.location.origin && url.pathname.endsWith("/content/stories.json")) {
+    e.respondWith(caches.open(VERSION).then(async (c) => {
+      try {
+        const res = await fetch(req);
+        if (res.ok) c.put(req, res.clone());
+        return res;
+      } catch {
+        return (await c.match(req, { ignoreSearch: true })) || Response.json({ stories: [] });
+      }
     }));
     return;
   }

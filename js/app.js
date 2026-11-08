@@ -1,6 +1,6 @@
 // App shell: hash routing between the four tabs and the entry pages.
 import { FILTER_DEFS } from "./art.js";
-import { timelineView, entryView, storiesView, walkView } from "./views.js";
+import { timelineView, entryView, storiesView, storyView, walkView } from "./views.js";
 import { mapView } from "./map.js";
 import { scheduleReminder } from "./clock.js";
 
@@ -26,12 +26,13 @@ function route() {
   view.className = `view view-${page}`;
 
   if (page === "entry") cleanup = entryView(view, arg);
+  else if (page === "story") cleanup = storyView(view, decodeURIComponent(arg || ""));
   else if (page === "stories") cleanup = storiesView(view);
   else if (page === "map") cleanup = mapView(view, { sel: arg });
   else if (page === "walk") cleanup = walkView(view);
   else cleanup = timelineView(view);
 
-  const tab = page === "entry" ? "timeline" : page;
+  const tab = page === "entry" ? "timeline" : page === "story" ? "stories" : page;
   tabs.forEach((a) => {
     const on = a.dataset.tab === tab;
     a.classList.toggle("on", on);
@@ -39,11 +40,11 @@ function route() {
   });
 
   const key = hash || "timeline";
-  view.scrollTop = page === "entry" ? 0 : (scrollMemory[key] || 0);
+  view.scrollTop = page === "entry" || page === "story" ? 0 : (scrollMemory[key] || 0);
   current = key;
 
   const h1 = view.querySelector("h1");
-  document.title = page === "timeline" ? "East Hendred Through Time"
+  if (page !== "story") document.title = page === "timeline" ? "East Hendred Through Time"
     : `${page === "entry" ? (h1?.textContent || "").trim() : TITLES[page]} · East Hendred Through Time`;
   // Move focus to the new screen's heading for screen-reader and keyboard users.
   if (h1 && document.activeElement !== document.body) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }

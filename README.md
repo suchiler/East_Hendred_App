@@ -31,21 +31,77 @@ Then open <http://localhost:8000>. A local server is needed, because opening `in
 
 ## Editing content
 
-Everything people read is in **`js/data.js`**: eras, timeline entries, stories, map sites and the walk. Edit the text there and reload the app.
+- **Stories and legends** live in the Stories spreadsheet and are published to `content/stories.json`. See "Stories: from the form to the app" below.
+- **Everything else** (eras, timeline entries, map sites and the walk) is in **`js/data.js`**. Edit the text there and reload the app.
 
 These still need local knowledge. They show in the app as red `[bracketed]` placeholders:
 
 - [ ] Walk facts: distance, time, ground, step-free access (`WALK.facts`)
 - [ ] "Getting there" directions between stops (`WALK.stops[].getThere`)
 - [ ] Confirm the walk order
-- [ ] Real positions: each site's `lat`/`lng` is approximate, and `x`/`y` place it on the painted map
-- [ ] Opening quotes for stories, from Woodward's letters or the Bulletin (optional)
+- [ ] Ground-check the mill's position (`SITES`, id `mill`): two sources differ by about 150 m
+- [ ] Confirm with the church: the clock's 2024 restoration and automatic winding
+
+## Stories: from the form to the app
+
+```
+Google Form  →  Submissions tab  →  Library tab  →  Publish  →  content/stories.json  →  app
+ (public)        (raw answers)       (you edit,       (menu or     (on GitHub)
+                                      set Status)      daily)
+```
+
+1. People fill in the **form**. Their answers land in the **Submissions** tab, which you shouldn't edit.
+2. Each submission is copied into the **Library** tab with **Status = New**, and you get an email.
+3. You tidy the text, add a source line, check coordinates, and set **Status = Ready** when it's good to go.
+   Use Checking while you're working on it, and Not used for anything you won't publish.
+4. **Stories app → Publish to app now** (or the daily 3am publish) sends the Ready rows to GitHub.
+   The app picks them up within a few minutes. Rows with problems are skipped and listed for you.
+
+The spreadsheet stays private. Only these columns are ever published: title, type, category, summary, story, people,
+when, sort year, era, place, coordinates, source, credit, linked entry, artwork and featured.
+Status, editor's notes, submission times and anything in Submissions (names, emails) never leave the Sheet.
+
+**Why the Sheet pushes to GitHub.** It would also be possible for GitHub to read the Sheet, but reading a private Sheet
+needs a Google Cloud service account. Pushing from the Sheet needs only a GitHub token, so this way is simpler to set up.
+
+### One-time setup
+
+1. Open the Stories spreadsheet, then **Extensions → Apps Script**.
+2. Delete what's in `Code.gs`, paste in all of **`tools/apps-script/Code.gs`**, and click **Save**.
+   (Optional: in Project Settings, tick "Show appsscript.json" and paste in `tools/apps-script/appsscript.json`, which sets the UK time zone.)
+3. Choose **setup** in the function menu and click **Run**. Google asks you to allow access: click through, and choose **Advanced → Go to project** if it warns that the app isn't verified. It's your own script.
+4. A box shows the form link. Share the short link with people. Paste the long link into `STORY_FORM_URL` in **`js/config.js`**.
+5. Make a GitHub token: on GitHub, go to **Settings → Developer settings → Fine-grained tokens → Generate new token**.
+   - Under **Repository access**, choose **Only select repositories** and pick East_Hendred_App.
+   - Under **Permissions → Contents**, choose **Read and write**.
+6. Back in the spreadsheet, reload the page. Choose **Stories app → Set GitHub token…** and paste the token.
+   (Or add it under Apps Script **Project Settings → Script properties** as `GITHUB_TOKEN`.)
+   If the app lives on a different branch, add `GITHUB_BRANCH` there too. The default is the branch this code is on.
+7. Choose **Stories app → Publish to app now**. It should say "No changes" or "Published".
+
+### Adding a category
+
+Add it to the **Category** column of the **Lists** tab, then run **Stories app → Set up or repair**.
+That updates the form's choices to match. Contributors can always pick **Other** and type their own,
+and custom categories are allowed in the Library too.
+
+### Story types
+
+| Type | Meaning | In the app |
+|---|---|---|
+| History | Documented and sourced | Its own section |
+| Memory | First-hand recollection | Its own section, with "Remembered by …" |
+| Legend | Tied to a real place or person, unproven | Its own section, marked ‡ |
+| Folk tale | Traditional tale, not claimed as true | Its own section, marked ‡ |
+| Ghost story | Sightings and hauntings | Its own section, marked ‡ |
+
+Stories with coordinates also appear as pins on the map: blue for history and memories, red with ‡ for folklore.
 
 ## Maps
 
 | Map | Status | What's needed |
 |---|---|---|
-| Painted | ✅ Works | Nothing |
+| Painted | ✅ Works | Nothing. Traced from OpenStreetMap ("Map data © OpenStreetMap contributors"); rebuild with `tools/painted-map/build.py` (see its NOTES.md) |
 | Today | ✅ Works | OpenStreetMap, free with attribution (fine for a community app) |
 | 1920s OS One-inch | ⏳ Disabled | A National Library of Scotland (NLS) map key |
 | 1870s OS Six-inch | ⏳ Disabled | Same NLS key |
@@ -74,6 +130,6 @@ Bump `VERSION` in **`sw.js`** (for example `eh-v2`). Otherwise phones that have 
 
 - Timeline facts: Victoria County History of Berkshire, vol. 4; Historic England; Hendred Museum.
 - Stories: the East Hendred Bulletin; *A Parson in the Vale of White Horse*, ed. Donald Gibson (1982); The Hunts of East Hendred.
-- Maps: © OpenStreetMap contributors; historic OS maps courtesy of the National Library of Scotland.
+- Maps: © OpenStreetMap contributors (the painted map is traced from OpenStreetMap data, ODbL); historic OS maps courtesy of the National Library of Scotland.
 - Fonts: IM Fell English (Igino Marini), Libre Franklin, IBM Plex Mono, served from Google Fonts.
 - [Leaflet](https://leafletjs.com) 1.9.4 (BSD-2-Clause), included in `vendor/`.

@@ -1,8 +1,11 @@
 // Timeline, Stories, Entry and Walk screens.
-import { ERAS, ENTRIES, SITES, WALK, STORIES, STORY_FILTERS } from "./data.js";
+import { ERAS, ENTRIES, SITES, WALK } from "./data.js";
 import { art } from "./art.js";
 import { esc, withGaps, store } from "./util.js";
 import * as clock from "./clock.js";
+import { STORY_FORM_URL } from "./config.js";
+import { project, PAINTED_SVG } from "./painted-map.js";
+import { loadStories, TYPES, typeName, isFolklore, isLong, paragraphs, byline } from "./stories.js";
 
 const eraOf = (id) => ERAS.find((e) => e.id === id);
 const siteOf = (id) => SITES.find((s) => s.id === id);
@@ -164,6 +167,7 @@ export function entryView(root, id) {
             ${stopIdx >= 0 ? `<a class="link" href="#/walk">Stop ${stopIdx + 1} of the village walk</a>` : ""}
           </div>` : ""}
         </section>
+        <section class="related" aria-label="Stories and legends" hidden></section>
         <p class="sources"><b>Sources:</b> ${esc(x.sources || "Victoria County History of Berkshire, vol. 4; Historic England; Hendred Museum.")}</p>
       </article>
     </div>
@@ -179,6 +183,14 @@ export function entryView(root, id) {
     paint();
     tick = setInterval(paint, 30000);
   }
+  loadStories().then((list) => {
+    const rel = list.filter((st) => st.linkedEntry === x.id);
+    const box = root.querySelector(".related");
+    if (!rel.length || !box) return;
+    box.hidden = false;
+    box.innerHTML = `<h2>Stories and legends</h2><ul>${rel.map((st) => `<li><a href="#/story/${esc(st.id)}">
+      <span class="t">${esc(st.title)}</span><span class="dir">${esc(typeName(st.type))}${isFolklore(st) ? " ‡" : ""}</span></a></li>`).join("")}</ul>`;
+  });
   root.querySelector(".share")?.addEventListener("click", () => {
     navigator.share({ title: x.title, text: `${x.date}: ${x.title} — East Hendred through time`, url: location.href }).catch(() => {});
   });
@@ -186,50 +198,150 @@ export function entryView(root, id) {
 }
 
 // ---------- Stories ----------
+const MUSEUM_URL = "https://www.hendredmuseum.org.uk/";
+const paras = (body) => paragraphs(body).map((p) => `<p>${esc(p)}</p>`).join("");
+const folkNote = (s) => (isFolklore(s) ? `<span class="folklore">‡ ${esc(typeName(s.type))}: not proven fact</span>` : "");
+
+function storyItem(s) {
+  const long = isLong(s);
+  const first = paragraphs(s.body)[0] || "";
+  const by = byline(s);
+  return `<li><article class="story">
+    <div class="story-head">
+      <div>
+        <h3>${esc(s.title)}</h3>
+        ${by ? `<p class="who">${esc(by)}</p>` : ""}
+        ${folkNote(s)}
+      </div>
+      ${s.artwork ? art(s.artwork, { width: 84, height: 84 }) : ""}
+    </div>
+    <div class="story-text">${long ? `<p>${esc(first)}</p>` : paras(s.body)}</div>
+    ${long ? `<a class="link more" href="#/story/${esc(s.id)}">Read the full story</a>` : ""}
+    <p class="sources"><b>Source:</b> ${esc(s.source)}${s.credit && s.type !== "Memory" ? ` · Shared by ${esc(s.credit)}` : ""}
+      ${s.coordinates ? ` · <a href="#/map/${esc(s.id)}">Show on map</a>` : ""}${long ? "" : ` · <a href="#/story/${esc(s.id)}">Link</a>`}</p>
+  </article></li>`;
+}
+
 export function storiesView(root) {
-  let filter = store.get("eh.storyFilter", "all");
+  let filter = store.get("eh.storyCat", "All");
+  const openState = store.get("eh.storySections", {});
+  const cta = STORY_FORM_URL
+    ? `<a class="btn" href="${esc(STORY_FORM_URL)}" target="_blank" rel="noopener">Share your story</a>`
+    : `<a class="btn" href="${MUSEUM_URL}" target="_blank" rel="noopener">Share a memory</a>`;
   root.innerHTML = `
     <div class="page">
       <header class="masthead">
         <h1>Village <em>voices</em></h1>
-        <p class="lede">Blacksmiths, evacuees, schoolchildren and a letter-writing parson: everyday East Hendred, told from the records they left.</p>
+        <p class="lede">Blacksmiths, evacuees, schoolchildren and a letter-writing parson, plus the legends and ghost stories the village still tells.</p>
       </header>
-      <nav class="tabs-inline" aria-label="Filter stories">
-        ${STORY_FILTERS.map(([id, label]) => `<button type="button" data-f="${id}" aria-pressed="false">${esc(label)}</button>`).join("")}
-      </nav>
-      <ol class="stories"></ol>
+      <nav class="tabs-inline" aria-label="Filter by topic"></nav>
+      <div class="story-sections"><p class="empty-note">Loading stories…</p></div>
       <section class="cta">
         <div>
           <h2>Do you remember?</h2>
-          <p>Grew up here, or have a family story, photo or letter? Share it with the Hendred Museum and it could appear here.</p>
-          <a class="btn" href="https://www.hendredmuseum.org.uk/" target="_blank" rel="noopener">Share a memory</a>
+          <p>Grew up here, or have a family story, a legend or a ghost story? Share it and, once it’s been read, it could appear here.</p>
+          ${cta}
         </div>
         ${art("envelope", { width: 76, height: 76 })}
       </section>
     </div>`;
-  const list = root.querySelector(".stories");
+
+  const nav = root.querySelector(".tabs-inline");
+  const box = root.querySelector(".story-sections");
+  let stories = [];
+
   const paint = () => {
-    root.querySelectorAll("[data-f]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === filter)));
-    const items = STORIES.filter((s) => filter === "all" || s.cat === filter);
-    list.innerHTML = items.length ? items.map((s) => `
-      <li><article>
-        <div class="story-head">
-          <div><h2>${esc(s.title)}</h2><p class="who">${esc(s.who)}</p></div>
-          ${art(s.art, { width: 84, height: 84 })}
-        </div>
-        <p class="story-text">${esc(s.text)}</p>
-        <p class="sources"><b>Source:</b> ${esc(s.source)}</p>
-      </article></li>`).join("")
-      : `<li class="empty-note">No stories here yet. <a href="https://www.hendredmuseum.org.uk/" target="_blank" rel="noopener">Know one?</a></li>`;
+    const cats = ["All", ...[...new Set(stories.map((s) => s.category || "Other"))].sort((a, b) => (a === "Other") - (b === "Other") || a.localeCompare(b))];
+    if (!cats.includes(filter)) filter = "All";
+    nav.innerHTML = cats.map((c) => `<button type="button" data-cat="${esc(c)}" aria-pressed="${c === filter}">${esc(c)}</button>`).join("");
+    const shown = stories.filter((s) => filter === "All" || (s.category || "Other") === filter);
+    const sections = TYPES.map((t) => {
+      const items = shown.filter((s) => s.type === t.id)
+        .sort((a, b) => (b.featured - a.featured) || ((a.sortYear ?? 99999) - (b.sortYear ?? 99999)));
+      if (!items.length) return "";
+      const open = openState[t.id] !== false;
+      return `<details class="story-section" data-type="${esc(t.id)}" ${open ? "open" : ""}>
+        <summary>
+          <span class="sec-title"><h2>${esc(t.label)}</h2><span class="count">${items.length}</span></span>
+          <span class="sec-blurb">${esc(t.blurb)}</span>
+          <svg class="chev" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <ol class="stories">${items.map(storyItem).join("")}</ol>
+      </details>`;
+    }).join("");
+    box.innerHTML = sections || `<p class="empty-note">No stories about this yet. <a href="${esc(STORY_FORM_URL || MUSEUM_URL)}" target="_blank" rel="noopener">Know one?</a></p>`;
+    box.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => {
+      openState[d.dataset.type] = d.open;
+      store.set("eh.storySections", openState);
+    }));
   };
-  root.querySelector(".tabs-inline").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-f]");
+
+  nav.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-cat]");
     if (!b) return;
-    filter = b.dataset.f;
-    store.set("eh.storyFilter", filter);
+    filter = b.dataset.cat;
+    store.set("eh.storyCat", filter);
     paint();
   });
-  paint();
+
+  let alive = true;
+  loadStories().then((list) => {
+    if (!alive) return;
+    stories = list;
+    if (!list.length) { box.innerHTML = `<p class="empty-note">Couldn’t load the stories. Check your connection and try again.</p>`; return; }
+    paint();
+  });
+  return () => { alive = false; };
+}
+
+// ---------- One story ----------
+export function storyView(root, id) {
+  root.innerHTML = `<div class="page empty"><p class="empty-note">Loading…</p></div>`;
+  let alive = true;
+  loadStories().then((list) => {
+    if (!alive) return;
+    const s = list.find((x) => x.id === id);
+    if (!s) {
+      root.innerHTML = `<div class="page empty"><h1>Not found</h1><p>That story isn’t here. <a href="#/stories">Back to the stories</a></p></div>`;
+      root.querySelector("h1")?.focus?.();
+      return;
+    }
+    const era = ERAS.find((e) => e.name === s.era);
+    const linked = s.linkedEntry && entryOf(s.linkedEntry);
+    // The date is already in the line above the title, so the byline is just the people.
+    const by = s.type === "Memory" ? byline(s) : s.people;
+    root.innerHTML = `
+      <div class="entry-page story-page" style="--c:${era ? era.color : "var(--woad)"}">
+        <div class="topbar">
+          <a class="back" href="#/stories">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+            Stories
+          </a>
+        </div>
+        ${s.artwork ? `<div class="hero-art story-hero">${art(s.artwork, { className: "hero" })}</div>` : ""}
+        <article class="page entry-article">
+          <header>
+            <p class="era-line">${esc(typeName(s.type))}${s.when ? ` · ${esc(s.when)}` : ""}</p>
+            <h1>${esc(s.title)}</h1>
+            ${by ? `<p class="entry-by">${esc(by)}</p>` : ""}
+          </header>
+          ${isFolklore(s) ? `<p class="folk-banner">‡ This is a ${esc(s.type.toLowerCase())}: part of village folklore, not proven fact.</p>` : ""}
+          <div class="body story-body">${paras(s.body)}</div>
+          ${s.place || s.coordinates ? `<section class="label" aria-label="Where">
+            <p><b>Where.</b> ${esc(s.place || "On the map")}</p>
+            ${s.coordinates ? `<div class="actions"><a class="btn" href="#/map/${esc(s.id)}">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              Show on map</a></div>` : ""}
+          </section>` : ""}
+          ${linked ? `<a class="linked-entry" href="#/entry/${linked.id}"><span class="dir">On the timeline</span><span class="t">${esc(linked.date)}: ${esc(linked.title)}</span></a>` : ""}
+          <p class="sources"><b>Source:</b> ${esc(s.source)}${s.credit && s.type !== "Memory" ? ` · Shared by ${esc(s.credit)}` : ""}</p>
+        </article>
+      </div>`;
+    document.title = `${s.title} · East Hendred Through Time`;
+    const h1 = root.querySelector("h1");
+    if (h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
+  });
+  return () => { alive = false; };
 }
 
 // ---------- Walk ----------
@@ -238,6 +350,7 @@ export function walkView(root) {
   const total = stops.length;
   let step = Math.min(store.get("eh.walkStep", 0), total);
   let open = null, toast = null;
+  const strip = stripMap(stops);
 
   root.innerHTML = `
     <div class="page">
@@ -248,19 +361,10 @@ export function walkView(root) {
       <section class="progress" aria-label="Your progress">
         <div class="progress-top"><span class="progress-label"></span><span class="muted small">Saved on this phone</span></div>
         <div class="bar" role="progressbar" aria-label="Walk progress" aria-valuemin="0" aria-valuemax="${total}"></div>
-        <div class="strip">
-          <svg viewBox="0 0 350 150" width="350" height="150" aria-hidden="true" focusable="false">
-            <g filter="url(#wc)" style="mix-blend-mode:multiply">
-              <ellipse cx="190" cy="88" rx="160" ry="56" fill="#e2cb9c" opacity=".6"/>
-              <path d="M0 40C60 46 90 20 140 30S220 56 260 36S320 6 350 12" stroke="#7ea2d2" stroke-width="9" fill="none" opacity=".6"/>
-              <circle cx="40" cy="80" r="12" fill="#6f8a55" opacity=".6"/>
-              <circle cx="320" cy="132" r="14" fill="#6f8a55" opacity=".6"/>
-            </g>
-            <g filter="url(#ink)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M0 98C80 94 150 100 220 96S310 92 350 94" stroke="#2b2924" stroke-width="7"/>
-              <path d="M0 98C80 94 150 100 220 96S310 92 350 94" stroke="#efe6d0" stroke-width="5"/>
-              <path d="M${stops.map((s) => `${s.sx} ${s.sy}`).join(" L")}" stroke="#2f4f8a" stroke-width="2.2" stroke-dasharray="5 4"/>
-            </g>
+        <div class="strip" style="height:${strip.h}px">
+          ${strip.svg}
+          <svg class="strip-route" viewBox="${strip.vb}" width="350" height="${strip.h}" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+            <path d="M${strip.pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" L")}" fill="none" stroke="#2f4f8a" stroke-width="${(2.4 / strip.k).toFixed(2)}" stroke-dasharray="${(5 / strip.k).toFixed(1)} ${(4 / strip.k).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <div class="strip-dots"></div>
         </div>
@@ -288,7 +392,7 @@ export function walkView(root) {
     bar.setAttribute("aria-valuenow", String(Math.min(step, total)));
     bar.innerHTML = stops.map((s) => `<span class="${s.i < step ? "done" : s.i === step ? "now" : ""}"></span>`).join("");
     $(".strip-dots").innerHTML = stops.map((s) =>
-      `<span class="sdot ${s.i < step ? "done" : s.i === step ? "now" : ""}" style="left:${s.sx}px;top:${s.sy}px">${s.i + 1}</span>`).join("");
+      `<span class="sdot ${s.i < step ? "done" : s.i === step ? "now" : ""}" style="left:${strip.screen[s.i].x}px;top:${strip.screen[s.i].y}px">${s.i + 1}</span>`).join("");
 
     $(".walk-toast").innerHTML = toast
       ? `<div class="toast"><span>${esc(toast)}</span><button type="button" data-act="undo">Undo</button></div>` : "";
@@ -353,4 +457,22 @@ export function walkView(root) {
     }
   });
   paint();
+}
+
+// A crop of the painted map framing the walk's stops, 350px wide.
+function stripMap(stops) {
+  const W = 350, pad = 26;
+  const pts = stops.map((s) => project(s.site.lat, s.site.lng));
+  const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+  let minx = Math.min(...xs) - pad, maxx = Math.max(...xs) + pad;
+  let miny = Math.min(...ys) - pad, maxy = Math.max(...ys) + pad;
+  let bw = maxx - minx, bh = maxy - miny;
+  const h = Math.round(Math.min(320, Math.max(160, (W * bh) / bw)));
+  const target = W / h;
+  if (bw / bh < target) { const nw = bh * target; minx -= (nw - bw) / 2; bw = nw; }
+  else { const nh = bw / target; miny -= (nh - bh) / 2; bh = nh; }
+  const k = W / bw;
+  const vb = `${minx.toFixed(1)} ${miny.toFixed(1)} ${bw.toFixed(1)} ${bh.toFixed(1)}`;
+  const svg = PAINTED_SVG.replace(/<svg([^>]*?)viewBox="[^"]*"/, `<svg$1viewBox="${vb}" width="${W}" height="${h}" preserveAspectRatio="xMidYMid slice" class="strip-art"`);
+  return { h, k, vb, svg, pts, screen: pts.map((p) => ({ x: Math.round((p.x - minx) * k), y: Math.round((p.y - miny) * k) })) };
 }

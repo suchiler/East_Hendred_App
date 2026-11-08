@@ -13,7 +13,7 @@ const nls = (tileset) => MAPTILER_KEY
 
 export const MAP_LAYERS = [
   { id: "painted", name: "Painted", full: "Painted map", swatch: "#adc189",
-    title: "Painted map, drawn for this app", credit: "Illustrated for this app", kind: "painted" },
+    title: "Painted map · Map data © OpenStreetMap contributors", credit: "Traced from OpenStreetMap, painted for this app", kind: "painted" },
   { id: "today", name: "Today", full: "Today", swatch: "#f7d774",
     title: "Today · © OpenStreetMap contributors", credit: "© OpenStreetMap contributors", kind: "tiles",
     url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19,
@@ -35,7 +35,12 @@ export const MAP_LAYERS = [
 ];
 
 // Centre of the village, for the real-map views.
-export const VILLAGE_CENTRE = [51.5902, -1.3345];
+export const VILLAGE_CENTRE = [51.5955, -1.3372];
+
+// The public "Share a story" Google Form. Run setup in the Stories spreadsheet's
+// Apps Script, then paste the form link it shows you here. While empty, the app
+// points people to the Hendred Museum instead.
+export const STORY_FORM_URL = "";
 
 // Hand-painted artwork. When a real painting is ready, save it in /art (WebP or PNG
 // on a transparent or paper background) and add it here, e.g. "tower": "art/tower.webp".
