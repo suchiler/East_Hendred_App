@@ -3,7 +3,7 @@
 // (or hand-painted images listed in ART_IMAGES in config.js).
 import { art } from "./art.js";
 import { ART_IMAGES } from "./config.js";
-import { LAND_DRAWINGS, CROSS_SECTION_LABELS } from "./land-art.js";
+import * as LA from "./land-art.js";
 import { esc, store } from "./util.js";
 
 let cache = null;
@@ -28,16 +28,19 @@ function sourcesBlock(sources = [], check) {
   </details>`;
 }
 
+// The painted cross-section has its labels drawn in; CROSS_SECTION_LABELS is a text
+// list for screen readers only, so nothing is drawn twice.
 function crossSection(cs) {
-  const label = esc(cs.label || "Cross-section through the parish from the Vale to the Ridgeway");
+  const label = esc(LA.CROSS_SECTION_DESCRIPTION || cs.label || "Cross-section through the parish from the Vale to the Ridgeway");
+  const list = (LA.CROSS_SECTION_LABELS || []).map((l) => esc(l.text)).join(", ");
+  const sr = list ? `<p class="sr-only">Labelled: ${list}.</p>` : "";
   if (ART_IMAGES["cross-section"]) {
-    return `<img class="xsec-art" src="${ART_IMAGES["cross-section"]}" alt="${label}">`;
+    return `<img class="xsec-art" src="${ART_IMAGES["cross-section"]}" alt="${label}">${sr}`;
   }
-  const d = LAND_DRAWINGS["cross-section"];
+  const d = LA.LAND_DRAWINGS["cross-section"];
   if (!d) return "";
-  const labels = (CROSS_SECTION_LABELS || []).map((l) =>
-    `<text x="${l.x}" y="${l.y}" text-anchor="${l.anchor || "start"}" class="xl ${esc(l.kind || "")}">${esc(l.text)}</text>`).join("");
-  return `<svg class="xsec-art" viewBox="${d.vb}" role="img" aria-label="${label}" preserveAspectRatio="xMidYMid meet">${d.svg}${labels}</svg>`;
+  const [, , w, h] = d.vb.split(/\s+/).map(Number);
+  return `<svg class="xsec-art" viewBox="${d.vb}" style="aspect-ratio:${w} / ${h}" role="img" aria-label="${label}" preserveAspectRatio="xMidYMid meet">${d.svg}</svg>${sr}`;
 }
 
 function speciesList(species = [], further) {
@@ -57,7 +60,7 @@ function redKitePanel(k) {
   return `<section class="kite" aria-labelledby="kite-h">
     <div class="kite-head">
       <div><p class="kicker">A success story</p><h3 id="kite-h">${esc(k.title)}</h3></div>
-      ${art("red-kite", { width: 96, height: 96 })}
+      ${art("red-kite", { width: 120, height: 84 })}
     </div>
     ${paras(k.body)}
     ${k.lookFor ? `<p class="look"><b>Look for</b> ${esc(k.lookFor)}</p>` : ""}
@@ -113,7 +116,7 @@ export function landView(root, arg) {
         </div>
         <figure class="xsec">
           ${crossSection(cs)}
-          <figcaption>${esc(cs.caption || "")}</figcaption>
+          <figcaption>${esc(LA.CROSS_SECTION_CAPTION || cs.caption || "")}</figcaption>
         </figure>
         <div class="page">
           <section class="why" aria-labelledby="why-h">

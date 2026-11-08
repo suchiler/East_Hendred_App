@@ -419,11 +419,6 @@ button { font: inherit; color: inherit; }
 .tabbar a { min-width: 0; }
 .xsec { margin: 20px 0 0; padding: 12px 0 10px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
 .xsec-art { display: block; width: 100%; height: auto; max-width: 760px; margin: 0 auto; }
-/* Label sizes are in drawing units (640 wide), so they scale with the picture: ~13px at phone width. */
-.xsec .xl { font-family: var(--body); font-size: 22px; fill: var(--ink); }
-.xsec .xl.feature { font-weight: 600; font-size: 24px; }
-.xsec .xl.rock { font-family: var(--display); font-style: italic; font-size: 21px; }
-.xsec .xl.water { fill: var(--woad); font-size: 20px; }
 .xsec figcaption { padding: 6px 20px 0; font-size: 13px; color: var(--muted); max-width: 640px; margin: 0 auto; }
 .why { padding-top: 22px; display: flex; flex-direction: column; gap: 12px; }
 .why h2 { font-size: 28px; line-height: 1.05; }
@@ -450,7 +445,7 @@ button { font: inherit; color: inherit; }
 .land-section .chev { position: absolute; right: 4px; top: 22px; transition: transform .15s ease; color: var(--ink); }
 .land-section:not([open]) .chev { transform: rotate(-90deg); }
 .ls-body { padding: 0 0 22px; display: flex; flex-direction: column; gap: 14px; }
-.ls-art .vignette { width: 100%; max-width: 360px; height: 120px; margin: 0 auto; }
+.ls-art .vignette { width: 100%; max-width: 330px; height: auto; aspect-ratio: 200 / 110; margin: 0 auto; }
 .look { border-left: 3px solid #5f6a3e; padding-left: 14px; line-height: 1.55; }
 .look b, .check b { font-weight: 600; }
 .kicker { font-size: 13px; font-weight: 600; color: #8c3b2c; }
@@ -472,9 +467,9 @@ button { font: inherit; color: inherit; }
 .sp-when { font-size: 14px; color: var(--soft); line-height: 1.4; }
 .further { font-size: 15px; color: var(--soft); border-top: 1px solid var(--rule); padding-top: 10px; line-height: 1.5; }
 .kite { border-top: 3px solid #8c3b2c; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
-.kite-head { display: grid; grid-template-columns: 1fr 96px; gap: 12px; align-items: start; }
+.kite-head { display: grid; grid-template-columns: 1fr 120px; gap: 12px; align-items: start; }
 .kite-head h3 { font-size: 28px; line-height: 1.05; }
-.kite-head .art { width: 96px; height: 96px; }
+.kite-head .art { width: 120px; height: 84px; }
 .kite p { line-height: 1.6; }
 .afield { margin-top: 28px; padding: 16px 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
 .afield h2 { font-size: 26px; margin-bottom: 6px; }
