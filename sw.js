@@ -1,7 +1,7 @@
 // Offline support: the app itself is cached on first visit; map tiles are cached
 // as you look at them (up to a limit), so the village maps keep working on a walk
 // with poor signal.
-const VERSION = "eh-v9";
+const VERSION = "eh-v10";
 const SHELL = [
   "./",
   "index.html",
