@@ -294,9 +294,9 @@ export function project(lat, lng) {{
   const y = (BOUNDS.north - lat) / (BOUNDS.north - BOUNDS.south) * MAP_H;
   return {{ x, y, inside: x >= 0 && x <= MAP_W && y >= 0 && y <= MAP_H }};
 }}
-
-export const PAINTED_SVG = `{svg}`;
 """
 open("painted-map.js", "w").write(js)
+# The drawing itself only feeds render.mjs, so the app doesn't download it.
+open("painted-svg.js", "w").write("// The painted map's SVG source, used only by render.mjs.\n" + f"export const PAINTED_SVG = `{svg}`;\n")
 print("svg bytes", len(svg), "| fields", len(fields), "woods", len(woods), "buildings", len(buildings),
       "streams", len(streams), "roads", len(roads_major), len(roads_minor), len(roads_service), "paths", len(paths_))

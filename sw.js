@@ -1,7 +1,7 @@
 // Offline support: the app itself is cached on first visit; map tiles are cached
 // as you look at them (up to a limit), so the village maps keep working on a walk
 // with poor signal.
-const VERSION = "eh-v5";
+const VERSION = "eh-v6";
 const SHELL = [
   "./",
   "index.html",
@@ -63,7 +63,7 @@ self.addEventListener("fetch", (e) => {
       const hit = await c.match(req);
       if (hit) return hit;
       const res = await fetch(req);
-      if (res.ok || res.type === "opaque") { c.put(req, res.clone()); trim(TILE_CACHE, TILE_LIMIT); }
+      if (res.ok || res.type === "opaque") c.put(req, res.clone()).then(() => trim(TILE_CACHE, TILE_LIMIT)).catch(() => {});
       return res;
     }));
     return;
@@ -74,22 +74,8 @@ self.addEventListener("fetch", (e) => {
       const hit = await c.match(req);
       if (hit) return hit;
       const res = await fetch(req);
-      if (res.ok || res.type === "opaque") c.put(req, res.clone());
+      if (res.ok || res.type === "opaque") c.put(req, res.clone()).catch(() => {});
       return res;
-    }));
-    return;
-  }
-
-  // Stories: fetch fresh when online, so newly published stories appear; fall back offline.
-  if (url.origin === self.location.origin && url.pathname.endsWith("/content/stories.json")) {
-    e.respondWith(caches.open(VERSION).then(async (c) => {
-      try {
-        const res = await fetch(req);
-        if (res.ok) c.put(req, res.clone());
-        return res;
-      } catch {
-        return (await c.match(req, { ignoreSearch: true })) || Response.json({ stories: [] });
-      }
     }));
     return;
   }
@@ -98,13 +84,19 @@ self.addEventListener("fetch", (e) => {
     // Network first, so every file comes from the same (latest) version of the app;
     // the cache is the fallback when offline. Serving cached files first could mix old
     // and new scripts after an update and break the page.
+    // A short time limit, so a weak signal on the walk falls back to the cache instead of
+    // hanging; with nothing cached yet (first visit) it keeps waiting for the network.
     e.respondWith(caches.open(VERSION).then(async (c) => {
-      try {
-        const res = await fetch(req, { cache: "no-cache" });
-        if (res.ok) c.put(req, res.clone());
+      const net = fetch(req, { cache: "no-cache" }).then((res) => {
+        if (res.ok) c.put(req, res.clone()).catch(() => {});
         return res;
+      });
+      const slow = new Promise((_, reject) => setTimeout(() => reject(new Error("slow")), 3000));
+      try {
+        return await Promise.race([net, slow]);
       } catch {
-        return (await c.match(req, { ignoreSearch: true })) || (await c.match("index.html")) || Response.error();
+        return (await c.match(req, { ignoreSearch: true }))
+          || net.catch(async () => (await c.match("index.html")) || Response.error());
       }
     }));
   }

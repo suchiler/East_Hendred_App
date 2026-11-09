@@ -1,10 +1,10 @@
 // Timeline, Stories, Entry and Walk screens.
 import { ERAS, ENTRIES, SITES, WALK } from "./data.js";
 import { art } from "./art.js";
-import { esc, withGaps, store } from "./util.js";
+import { esc, withGaps, store, focusHeading, keepInRail } from "./util.js";
 import * as clock from "./clock.js";
 import { STORY_FORM_URL } from "./config.js";
-import { project, PAINTED_SVG } from "./painted-map.js";
+import { project, MAP_W, MAP_H } from "./painted-map.js";
 import { loadStories, TYPES, typeName, isFolklore, isLong, paragraphs, byline } from "./stories.js";
 
 const eraOf = (id) => ERAS.find((e) => e.id === id);
@@ -89,13 +89,7 @@ export function timelineView(root) {
         const on = a.dataset.era === id;
         a.classList.toggle("on", on);
         if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
-        // Keep the active era visible in the rail without disturbing the page scroll.
-        if (on) {
-          const rail = a.parentElement;
-          const left = a.offsetLeft - 10, right = a.offsetLeft + a.offsetWidth + 10;
-          if (left < rail.scrollLeft) rail.scrollTo({ left, behavior: "smooth" });
-          else if (right > rail.scrollLeft + rail.clientWidth) rail.scrollTo({ left: right - rail.clientWidth, behavior: "smooth" });
-        }
+        if (on) keepInRail(a.parentElement, a);
       });
     });
   }, { root: scroller, rootMargin: "-20% 0px -70% 0px" });
@@ -246,11 +240,7 @@ export function storiesView(root) {
       const on = a.dataset.type === id;
       a.classList.toggle("on", on);
       if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
-      if (on) {
-        const left = a.offsetLeft - 10, right = a.offsetLeft + a.offsetWidth + 10;
-        if (left < rail.scrollLeft) rail.scrollTo({ left, behavior: "smooth" });
-        else if (right > rail.scrollLeft + rail.clientWidth) rail.scrollTo({ left: right - rail.clientWidth, behavior: "smooth" });
-      }
+      if (on) keepInRail(rail, a);
     });
   };
 
@@ -327,7 +317,7 @@ export function storyView(root, id) {
     const s = list.find((x) => x.id === id);
     if (!s) {
       root.innerHTML = `<div class="page empty"><h1>Not found</h1><p>That story isn’t here. <a href="#/stories">Back to the stories</a></p></div>`;
-      root.querySelector("h1")?.focus?.();
+      focusHeading(root);
       return;
     }
     const era = ERAS.find((e) => e.name === s.era);
@@ -362,8 +352,7 @@ export function storyView(root, id) {
         </article>
       </div>`;
     document.title = `${s.title} · East Hendred Through Time`;
-    const h1 = root.querySelector("h1");
-    if (h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
+    focusHeading(root);
   });
   return () => { alive = false; };
 }
@@ -386,9 +375,9 @@ export function walkView(root) {
       <section class="progress" aria-label="Your progress">
         <div class="progress-top"><span class="progress-label"></span><span class="muted small">Saved on this phone</span></div>
         <div class="bar" role="progressbar" aria-label="Walk progress" aria-valuemin="0" aria-valuemax="${total}"></div>
-        <div class="strip" style="height:${strip.h}px">
-          ${strip.svg}
-          <svg class="strip-route" viewBox="${strip.vb}" width="350" height="${strip.h}" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+        <div class="strip" style="aspect-ratio:${strip.W} / ${strip.h}">
+          <svg viewBox="${strip.vb}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+            <image href="art/painted-map@2x.webp" width="${MAP_W}" height="${MAP_H}"/>
             <path d="M${strip.pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" L")}" fill="none" stroke="#2f4f8a" stroke-width="${(2.4 / strip.k).toFixed(2)}" stroke-dasharray="${(5 / strip.k).toFixed(1)} ${(4 / strip.k).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <div class="strip-dots"></div>
@@ -417,7 +406,7 @@ export function walkView(root) {
     bar.setAttribute("aria-valuenow", String(Math.min(step, total)));
     bar.innerHTML = stops.map((s) => `<span class="${s.i < step ? "done" : s.i === step ? "now" : ""}"></span>`).join("");
     $(".strip-dots").innerHTML = stops.map((s) =>
-      `<span class="sdot ${s.i < step ? "done" : s.i === step ? "now" : ""}" style="left:${strip.screen[s.i].x}px;top:${strip.screen[s.i].y}px">${s.i + 1}</span>`).join("");
+      `<span class="sdot ${s.i < step ? "done" : s.i === step ? "now" : ""}" style="left:${strip.screen[s.i].x}%;top:${strip.screen[s.i].y}%">${s.i + 1}</span>`).join("");
 
     $(".walk-toast").innerHTML = toast
       ? `<div class="toast"><span>${esc(toast)}</span><button type="button" data-act="undo">Undo</button></div>` : "";
@@ -485,7 +474,7 @@ export function walkView(root) {
   paint();
 }
 
-// A crop of the painted map framing the walk's stops, 350px wide.
+// A crop of the painted map framing the walk's stops; dots are placed in % so the strip can shrink.
 function stripMap(stops) {
   const W = 350, pad = 26;
   const pts = stops.map((s) => project(s.site.lat, s.site.lng));
@@ -499,6 +488,5 @@ function stripMap(stops) {
   else { const nh = bw / target; miny -= (nh - bh) / 2; bh = nh; }
   const k = W / bw;
   const vb = `${minx.toFixed(1)} ${miny.toFixed(1)} ${bw.toFixed(1)} ${bh.toFixed(1)}`;
-  const svg = PAINTED_SVG.replace(/<svg([^>]*?)viewBox="[^"]*"/, `<svg$1viewBox="${vb}" width="${W}" height="${h}" preserveAspectRatio="xMidYMid slice" class="strip-art"`);
-  return { h, k, vb, svg, pts, screen: pts.map((p) => ({ x: Math.round((p.x - minx) * k), y: Math.round((p.y - miny) * k) })) };
+  return { W, h, k, vb, pts, screen: pts.map((p) => ({ x: (((p.x - minx) / bw) * 100).toFixed(2), y: (((p.y - miny) / bh) * 100).toFixed(2) })) };
 }

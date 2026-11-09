@@ -8,7 +8,6 @@ import { loadStories, isFolklore, typeName } from "./stories.js";
 import { esc } from "./util.js";
 
 const entryOf = (id) => ENTRIES.find((e) => e.id === id);
-const typeLabel = typeName;
 const ARROW = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>';
 const MAX_ZOOM = 3.5;
 const CLOSE = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
@@ -90,15 +89,12 @@ export function mapView(root, { sel } = {}) {
           </button>
         </div>
         <ul class="layer-list">
-          ${MAP_LAYERS.filter(layerReady).map((l) => {
-            const ready = true;
-            return `<li><button type="button" class="layer-row" data-layer="${l.id}" ${ready ? "" : "disabled"} aria-pressed="false">
+          ${MAP_LAYERS.filter(layerReady).map((l) => `<li><button type="button" class="layer-row" data-layer="${l.id}" aria-pressed="false">
               <span class="swatch" style="background:${l.swatch}"></span>
               <span class="layer-text"><span class="layer-full">${esc(l.full)}</span>
-              <span class="layer-sub">${esc(ready ? l.credit : l.missing)}</span></span>
+              <span class="layer-sub">${esc(l.credit)}</span></span>
               <svg class="tick" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-            </button></li>`;
-          }).join("")}
+            </button></li>`).join("")}
         </ul>
       </section>
     </section>`;
@@ -166,12 +162,13 @@ export function mapView(root, { sel } = {}) {
 
   // ---- Pins (screen space, so they stay the same size at any zoom) ----
   let offMap = [];
+  let pinsSig = "";
   function placePins() {
-    if (stage.hidden) { pinsEl.innerHTML = ""; placeEdges(); return; }
+    if (stage.hidden) { pinsEl.innerHTML = ""; pinsSig = ""; placeEdges(); return; }
     const s = S();
     const placed = [];
     offMap = [];
-    const html = [];
+    const html = [], moves = [], keys = [];
     const ordered = [...state.items].sort((a, b) => RANK[a.kind] - RANK[b.kind]);
     for (const it of ordered) {
       const p = project(it.lat, it.lng);
@@ -188,6 +185,8 @@ export function mapView(root, { sel } = {}) {
       placed.push({ x, y });
       it.sx = x; it.sy = y;
       const on = it.key === state.sel;
+      const r = it.kind === "site" ? 22 : 20;
+      moves.push([x - r, y - r]); keys.push(it.key);
       if (it.kind === "site") {
         html.push(`<button type="button" class="pin${on ? " on" : ""}" data-key="${it.key}" style="left:${x - 22}px;top:${y - 22}px"
           aria-label="${it.n ? `${it.n}. ` : ""}${esc(it.name)}" aria-pressed="${on}"><span class="${it.n ? "" : "plain"}">${it.n ?? ""}</span></button>`);
@@ -196,14 +195,26 @@ export function mapView(root, { sel } = {}) {
           aria-label="Nature: ${esc(it.name)}" aria-pressed="${on}"><span>${LEAF}</span></button>`);
       } else {
         html.push(`<button type="button" class="spin${it.folk ? " folk" : ""}${on ? " on" : ""}" data-key="${it.key}" style="left:${x - 20}px;top:${y - 20}px"
-          aria-label="${esc(typeLabel(it.story.type))}: ${esc(it.name)}" aria-pressed="${on}"><span>${it.folk ? "‡" : ""}</span></button>`);
+          aria-label="${esc(typeName(it.story.type))}: ${esc(it.name)}" aria-pressed="${on}"><span>${it.folk ? "‡" : ""}</span></button>`);
       }
     }
     if (state.you) {
       const p = project(state.you.lat, state.you.lng);
-      if (p.inside) html.push(`<span class="you-dot" style="left:${view.dx + p.x * s - 9}px;top:${view.dy + p.y * s - 9}px" role="img" aria-label="You are here"></span>`);
+      if (p.inside) {
+        const [l, t] = [view.dx + p.x * s - 9, view.dy + p.y * s - 9];
+        moves.push([l, t]); keys.push("you");
+        html.push(`<span class="you-dot" style="left:${l}px;top:${t}px" role="img" aria-label="You are here"></span>`);
+      }
     }
-    pinsEl.innerHTML = html.join("") + '<span class="pin-tag" aria-hidden="true" hidden></span>';
+    // Rebuild only when the pins themselves change; while panning or pinching just move them,
+    // which is much cheaper on phones and keeps keyboard focus on a pin.
+    const sig = `${keys.join(",")}|${state.sel}`;
+    if (sig !== pinsSig) {
+      pinsEl.innerHTML = html.join("") + '<span class="pin-tag" aria-hidden="true" hidden></span>';
+      pinsSig = sig;
+    } else {
+      moves.forEach(([l, t], i) => { const el = pinsEl.children[i]; el.style.left = `${l}px`; el.style.top = `${t}px`; });
+    }
     placeTag(placed);
     placeEdges();
   }
@@ -354,7 +365,6 @@ export function mapView(root, { sel } = {}) {
     // No floating attribution box: the credit is shown as text under the layer pill.
     lmap = L.map(leafletEl, { zoomControl: false, attributionControl: false }).setView(VILLAGE_CENTRE, 16);
     L.control.zoom({ position: "topright" }).addTo(lmap);
-    const it = state.items.find((x) => x.key === state.sel);
     addLeafletMarkers();
   }
 
@@ -371,7 +381,8 @@ export function mapView(root, { sel } = {}) {
       if (lmap) {
         if (tiles) lmap.removeLayer(tiles);
         if (overlay) { lmap.removeLayer(overlay); overlay = null; }
-        tiles = L.tileLayer(l.url, { maxZoom: l.maxZoom || 18, attribution: l.wms ? "" : l.attribution }).addTo(lmap);
+        // crossOrigin: OSM allows it, and the offline cache stores CORS tiles far more compactly than opaque ones.
+        tiles = L.tileLayer(l.url, { maxZoom: l.maxZoom || 18, crossOrigin: /openstreetmap\.org/.test(l.url) }).addTo(lmap);
         if (l.wms) {
           const big = l.wms.tileSize === 512;
           overlay = L.tileLayer.wms(l.wms.url, { layers: l.wms.layers, format: "image/png", transparent: true,
@@ -401,7 +412,6 @@ export function mapView(root, { sel } = {}) {
           });
           overlay.addTo(lmap);
         }
-        // Overlays read best zoomed out a little, so the whole parish's pattern shows.
         // Once the map has measured itself: centre on the selected place (or keep the view),
         // zoomed out a little for overlays so the whole parish's pattern shows.
         setTimeout(() => {
@@ -476,7 +486,7 @@ export function mapView(root, { sel } = {}) {
     } else {
       const s = it.story;
       head = `<span class="num story${it.folk ? " folk" : ""}" aria-hidden="true">${it.folk ? "‡" : "¶"}</span>`;
-      sub = `${esc(typeLabel(s.type))}${s.when ? ` · ${esc(s.when)}` : ""}`;
+      sub = `${esc(typeName(s.type))}${s.when ? ` · ${esc(s.when)}` : ""}`;
       text = s.summary || String(s.body).split(/\n\s*\n/)[0];
       link = `#/story/${s.id}`;
     }

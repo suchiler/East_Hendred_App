@@ -4,7 +4,7 @@
 import { art } from "./art.js";
 import { ART_IMAGES } from "./config.js";
 import * as LA from "./land-art.js";
-import { esc, store } from "./util.js";
+import { esc, store, focusHeading } from "./util.js";
 
 let cache = null;
 export function loadLand() {
@@ -158,8 +158,8 @@ export function landView(root, arg) {
       const el = root.querySelector(`#land-${CSS.escape(arg)}`);
       if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
     }
-    const h1 = root.querySelector("h1");
-    if (h1) document.title = "The land · East Hendred Through Time";
+    // The loading screen's heading had focus; it's been replaced, so focus the new one.
+    if (document.activeElement === document.body) focusHeading(root);
   });
   return () => { alive = false; };
 }

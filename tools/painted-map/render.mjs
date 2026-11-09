@@ -1,4 +1,4 @@
-// Renders the painted map (js/painted-map.js) to WebP images at 2× and 3×, so phones
+// Renders the painted map (tools/painted-map/painted-svg.js) to WebP images at 2× and 3×, so phones
 // show a plain image instead of running heavy SVG watercolour filters (which some
 // iPhones drop). Run after changing the drawing:
 //   NODE_PATH=$(npm root -g) node tools/painted-map/render.mjs
@@ -10,7 +10,8 @@ import path from "path";
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const { MAP_W, MAP_H, PAINTED_SVG } = await import(path.join(root, "js/painted-map.js"));
+const { MAP_W, MAP_H } = await import(path.join(root, "js/painted-map.js"));
+const { PAINTED_SVG } = await import(path.join(root, "tools/painted-map/painted-svg.js"));
 const { FILTER_DEFS } = await import(path.join(root, "js/art.js")).catch(() => ({ FILTER_DEFS: "" }));
 
 const browser = await chromium.launch();
