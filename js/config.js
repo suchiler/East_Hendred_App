@@ -64,8 +64,8 @@ export const layerReady = (l) => l.kind === "painted" || (!!l.url && !l.disabled
 export const VILLAGE_CENTRE = [51.5955, -1.3372];
 
 // The public "Share a story" Google Form. Run setup in the Stories spreadsheet's
-// Apps Script, then paste the form link it shows you here. While empty, the app
-// points people to the Hendred Museum instead.
+// Apps Script, then paste the form link it shows you here. While empty, the
+// "Share your story" box and its links are hidden.
 export const STORY_FORM_URL = "";
 
 // Hand-painted artwork. When a real painting is ready, save it in /art (WebP or PNG

@@ -18,7 +18,7 @@ export function timelineView(root) {
       <header class="masthead">
         <p class="meta"><span>Vale of White Horse, Oxfordshire</span><span class="gridref">SU 459 887</span></p>
         <h1>East Hendred <em>through time</em></h1>
-        <p class="lede">A cloth town, a family that never left, and a church clock that has played the same tune since 1525. Start at the surface and dig down.</p>
+        <p class="lede">A cloth town, a family that never left, and a church clock made in 1525 that still plays a hymn tune every three hours. Start at the surface and dig down.</p>
       </header>
 
       <section class="clock" aria-labelledby="clock-h">
@@ -50,12 +50,12 @@ export function timelineView(root) {
                   <span class="entry-text">
                     <span class="entry-title">${esc(x.title)}</span>
                     <span class="entry-gloss">${esc(x.gloss)}</span>
-                    ${x.legend ? `<span class="folklore">‡ Folklore</span>` : ""}
+                    ${x.legend ? `<span class="folklore">‡ includes folklore</span>` : ""}
                   </span>
                 </a></li>`).join("")}
             </ol>
           </section>`).join("")}
-        <p class="fineprint">‡ marks folklore. Dates from the Victoria County History, Historic England and the Hendred Museum.</p>
+        <p class="fineprint">‡ marks an entry that includes a piece of folklore; the rest is documented. Each entry lists its own sources.</p>
       </div>
     </div>`;
 
@@ -142,7 +142,7 @@ export function entryView(root, id) {
           </div>` : ""}
         </section>
         <section class="related" aria-label="Stories and legends" hidden></section>
-        <p class="sources"><b>Sources:</b> ${esc(x.sources || "Victoria County History of Berkshire, vol. 4; Historic England; Hendred Museum.")}</p>
+        <p class="sources"><b>Sources:</b> ${esc(x.sources || "Source to be added.")}</p>
       </article>
     </div>
     <nav class="neighbours" aria-label="Neighbouring entries">
@@ -172,7 +172,6 @@ export function entryView(root, id) {
 }
 
 // ---------- Stories ----------
-const MUSEUM_URL = "https://www.hendredmuseum.org.uk/";
 const paras = (body) => paragraphs(body).map((p) => `<p>${esc(p)}</p>`).join("");
 const folkNote = (s) => (isFolklore(s) ? `<span class="folklore">‡ ${esc(typeName(s.type))}: not proven fact</span>` : "");
 
@@ -206,9 +205,6 @@ const typeSlug = (t) => t.toLowerCase().replace(/[^a-z]+/g, "-");
 export function storiesView(root) {
   let filter = store.get("eh.storyCat", "All");
   const openState = store.get("eh.storySections", {});
-  const cta = STORY_FORM_URL
-    ? `<a class="btn" href="${esc(STORY_FORM_URL)}" target="_blank" rel="noopener">Share your story</a>`
-    : `<a class="btn" href="${MUSEUM_URL}" target="_blank" rel="noopener">Share a memory</a>`;
   root.innerHTML = `
     <div class="page">
       <header class="masthead">
@@ -221,14 +217,14 @@ export function storiesView(root) {
       </div>
       <nav class="rail type-rail" aria-label="Jump to a kind of story"></nav>
       <div class="story-sections"><p class="empty-note">Loading stories…</p></div>
-      <section class="cta">
+      ${STORY_FORM_URL ? `<section class="cta">
         <div>
           <h2>Do you remember?</h2>
           <p>Grew up here, or have a family story, a legend or a ghost story? Share it and, once it’s been read, it could appear here.</p>
-          ${cta}
+          <a class="btn" href="${esc(STORY_FORM_URL)}" target="_blank" rel="noopener">Share your story</a>
         </div>
         ${art("envelope", { width: 76, height: 76 })}
-      </section>
+      </section>` : ""}
     </div>`;
 
   const select = root.querySelector("#story-cat");
@@ -272,7 +268,7 @@ export function storiesView(root) {
         </summary>
         <ol class="stories">${items.map(storyItem).join("")}</ol>
       </details>`;
-    }).join("") || `<p class="empty-note">No stories about this yet. <a href="${esc(STORY_FORM_URL || MUSEUM_URL)}" target="_blank" rel="noopener">Know one?</a></p>`;
+    }).join("") || `<p class="empty-note">No stories about this yet.${STORY_FORM_URL ? ` <a href="${esc(STORY_FORM_URL)}" target="_blank" rel="noopener">Know one?</a>` : ""}</p>`;
 
     box.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => {
       openState[d.dataset.type] = d.open;

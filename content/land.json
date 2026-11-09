@@ -217,7 +217,7 @@
    "body": [
     "Along the crest of the downs, the Ridgeway forms the southern edge of the parish. It is often called Britain's oldest road: people have used it for at least 5,000 years, because the high, dry chalk was easier to travel than the wet, wooded vale below, and gave long views of anyone approaching. It linked the Dorset coast with the Wash.",
     "It never ran alone. A second, lower route, the Icknield Way, runs parallel just above the spring line — it still crosses the parish about two kilometres south of the A417, at around 120 metres. Between the two, people could choose high and dry or low and close to water, depending on the season.",
-    "Beside the track stands Scutchamer Knob (also called Cuckhamsley Hill), a large round barrow made of layers of turf. Historic England thinks it probably began as a Bronze Age burial mound, later used in the Iron Age and after. Its old name, Cwichelm's Low, links it to a 7th-century prince of Wessex. In 1006 a Viking army marched here because, it was said, raiders who reached it would never get back to the sea; and for centuries it was the meeting place of the shire court (moot), until 1620. Repeated digging for Cwichelm's grave left the mound its lopsided shape — nothing important was ever found.",
+    "Beside the track stands Scutchamer Knob (also called Cuckhamsley Hill), a large round barrow made of layers of turf. Historic England thinks it probably began as a Bronze Age burial mound, later reused. Its old name, Cwichelm's barrow, links it to Cwichelm, a 7th-century West Saxon king. In 1006 a Viking army marched here because, it was said, raiders who reached it would never get back to the sea. A charter of about 990 records a court, probably the shire court, meeting at the mound, and as late as 1620 people still came to trade at Cuckhamsley Hill. Repeated digging for Cwichelm's grave left the mound its lopsided shape, and no king's grave was ever found.",
     "From the Middle Ages into the 1800s, drovers walked sheep and cattle along the Ridgeway from the West Country and Wales towards London. Many flocks were bound for the great sheep fairs at East Ilsley, just over the downs to the south-east. Until enclosure the 'road' was really a broad band of tracks across open down; hedges and banks, built from the 18th century, pinned it to the line we follow today.",
     "In 1973 it opened as the Ridgeway National Trail, 87 miles (139 km) from Overton Hill near Avebury to Ivinghoe Beacon. Here, at East Hendred Down, the trail also marks the county boundary: north is Oxfordshire, south is West Berkshire. This stretch is a restricted byway — open to walkers, cyclists and horse riders, but not to private motor vehicles."
    ],
@@ -286,10 +286,10 @@
   {
    "id": "water",
    "title": "Water",
-   "summary": "Springs at the foot of the downs feed East Hendred Brook, which runs north through the village to the Thames.",
+   "summary": "Springs at the foot of the downs feed East Hendred Brook, which runs north through the village and on towards the Thames.",
    "body": [
     "The chalk of the downs works like a giant sponge (an aquifer). Rain soaks in, moves slowly downwards and northwards, and comes out where the chalk and greensand sit on the watertight Gault — the spring line. That is where East Hendred Brook begins.",
-    "The brook runs north through the village (the lanes called Ford Lane and Fordy Lane are a clue to where it was once crossed on foot or by cart), then under the A417 and across the Vale. Downstream it becomes the Ginge Brook and then the Mill Brook before joining the Thames between Abingdon and Wallingford. Mills used this water from Saxon times: Domesday records a mill in the village, and the mill by Ludbridge stands on the brook today.",
+    "The brook runs north through the village (the lanes called Ford Lane and Fordy Lane are a clue to where it was once crossed on foot or by cart), then under the A417 and across the Vale. Further north it joins the Ginge Brook, which carries the water on (as the Mill Brook near its end) to the Thames near Sutton Courtenay. Mills used this water from Saxon times: Domesday records a mill in the village, and the mill by Ludbridge stands on the brook today.",
     "Spring-fed streams like this are chalk streams, a rare kind of river: of about 210 chalk streams in the world, around 160 are in England. Because they are fed from underground, their water is clear, cool and steady in flow and temperature through the year, which suits plants like water crowfoot and insects that need clean, well-oxygenated water. The Hendred streams are listed among the scarp-face tributaries of the Thames in the national index of English chalk streams.",
     "The Environment Agency monitors the Ginge Brook and Mill Brook as one water body, about 17 km long with a catchment of about 40 km². Its last full assessment (2019) found the insect life in high condition, but the overall ecological status only moderate, held back by phosphate and plant indicators."
    ],
@@ -344,7 +344,7 @@
     }
    ],
    "art": "section-water",
-   "check": "Maps disagree on the brook’s name through the village and where it reaches the Thames; worth checking locally.",
+   "check": "Sources describe the brook either as joining the Ginge Brook or as taking that name downstream, and differ on exactly where it reaches the Thames (most say near Sutton Courtenay); worth checking locally.",
    "place": "brook-ford-lane"
   },
   {
