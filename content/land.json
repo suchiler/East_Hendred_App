@@ -281,8 +281,7 @@
    ],
    "art": "section-ridgeway",
    "check": "Sources disagree on whether Scutchamer Knob began in the Bronze Age or the Iron Age.",
-   "place": "knob",
-   "feature": true
+   "place": "knob"
   },
   {
    "id": "water",

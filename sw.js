@@ -1,7 +1,7 @@
 // Offline support: the app itself is cached on first visit; map tiles are cached
 // as you look at them (up to a limit), so the village maps keep working on a walk
 // with poor signal.
-const VERSION = "eh-v3";
+const VERSION = "eh-v4";
 const SHELL = [
   "./",
   "index.html",
@@ -18,6 +18,8 @@ const SHELL = [
   "js/painted-map.js",
   "content/stories.json",
   "content/land.json",
+  "art/painted-map@2x.webp",
+  "art/painted-map@3x.webp",
   "js/land.js",
   "js/land-art.js",
   "vendor/leaflet/leaflet.js",
@@ -93,11 +95,17 @@ self.addEventListener("fetch", (e) => {
   }
 
   if (url.origin === self.location.origin) {
-    // Serve from cache straight away, refresh it in the background.
+    // Network first, so every file comes from the same (latest) version of the app;
+    // the cache is the fallback when offline. Serving cached files first could mix old
+    // and new scripts after an update and break the page.
     e.respondWith(caches.open(VERSION).then(async (c) => {
-      const hit = await c.match(req, { ignoreSearch: true });
-      const fresh = fetch(req).then((res) => { if (res.ok) c.put(req, res.clone()); return res; }).catch(() => null);
-      return hit || (await fresh) || c.match("index.html");
+      try {
+        const res = await fetch(req, { cache: "no-cache" });
+        if (res.ok) c.put(req, res.clone());
+        return res;
+      } catch {
+        return (await c.match(req, { ignoreSearch: true })) || (await c.match("index.html")) || Response.error();
+      }
     }));
   }
 });

@@ -4,7 +4,6 @@ import { timelineView, entryView, storiesView, storyView, walkView } from "./vie
 import { mapView } from "./map.js";
 import { landView } from "./land.js";
 import { LA_DEFS } from "./land-art.js";
-import { scheduleReminder } from "./clock.js";
 
 document.body.insertAdjacentHTML("afterbegin", FILTER_DEFS + LA_DEFS);
 
@@ -55,7 +54,6 @@ function route() {
 
 window.addEventListener("hashchange", route);
 route();
-scheduleReminder();
 
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   navigator.serviceWorker.register("sw.js").catch(() => {});

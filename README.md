@@ -5,7 +5,7 @@ An installable web app (PWA) about a thousand years of East Hendred, a chalk-dow
 - **Timeline:** 23 moments from the Ridgeway to the clock's 500th birthday, newest first ("start at the surface and dig down"), grouped by era. It also counts down to the next tune of the 1525 faceless clock.
 - **Stories:** real local people, each with its source: blacksmiths, evacuees, schoolchildren, a letter-writing parson.
 - **Map:** a painted village map, plus today's map and slots for historic Ordnance Survey maps (1920s, 1870s) and Rocque's 1761 survey.
-- **Walk:** an eight-stop guided walk that remembers your progress.
+- **Walk:** a seven-stop guided walk that remembers your progress.
 
 It works offline once opened, and installs to a phone's home screen. There's no build step: it's plain HTML, CSS and JavaScript.
 
@@ -38,7 +38,7 @@ These still need local knowledge. They show in the app as red `[bracketed]` plac
 
 - [ ] Walk facts: distance, time, ground, step-free access (`WALK.facts`)
 - [ ] "Getting there" directions between stops (`WALK.stops[].getThere`)
-- [ ] Confirm the walk order
+- [x] Walk order confirmed (Nov 2026): St Augustine’s, St Mary’s, Hendred House, the Eyston Arms, King’s Manor, Champs Chapel, Orchard House
 - [ ] Ground-check the mill's position (`SITES`, id `mill`): two sources differ by about 150 m
 - [ ] Confirm with the church: the clock's 2024 restoration and automatic winding
 
@@ -99,13 +99,17 @@ Stories with coordinates also appear as pins on the map: blue for history and me
 
 ## Maps
 
+The Map screen always opens on the painted map. "Choose a map" only lists maps that can be shown right now. The others keep their settings in `js/config.js` and appear automatically once they're ready (a key or URL is added). The credit for the current map is shown as small text under the "Map:" pill.
+
 | Map | Status | What's needed |
 |---|---|---|
-| Painted | ✅ Works | Nothing. Traced from OpenStreetMap ("Map data © OpenStreetMap contributors"); rebuild with `tools/painted-map/build.py` (see its NOTES.md) |
+| Painted | ✅ Works | Nothing. Traced from OpenStreetMap; rebuild the drawing with `tools/painted-map/build.py` (see its NOTES.md). It's shown as a pre-rendered image (`art/painted-map@2x.webp` and `@3x.webp`), because large SVG watercolour filters are too heavy for some phones. **After changing the drawing, re-render it:** `NODE_PATH=$(npm root -g) node tools/painted-map/render.mjs` |
 | Today | ✅ Works | OpenStreetMap, free with attribution (fine for a community app) |
-| 1920s OS One-inch | ⏳ Disabled | A National Library of Scotland (NLS) map key |
-| 1870s OS Six-inch | ⏳ Disabled | Same NLS key |
-| 1761 Rocque | ⏳ Disabled | A scan of the Berkshire sheet, lined up with today's map and served as tiles |
+| Habitats | ✅ Works | Natural England's Living England habitat map (every field classified), drawn over OpenStreetMap, with a key |
+| Geology | ✅ Works | British Geological Survey 1:625,000 bedrock, with a key (Gault and Greensand, Grey Chalk, White Chalk) |
+| 1920s OS One-inch | ⏳ Hidden | A National Library of Scotland (NLS) map key |
+| 1870s OS Six-inch | ⏳ Hidden | Same NLS key |
+| 1761 Rocque | ⏳ Hidden | A scan of the Berkshire sheet, lined up with today's map and served as tiles |
 
 **Getting the NLS key:** email **maps@nls.uk** and explain that this is a free, non-commercial community app for East Hendred, or use their Historic Maps subscription through MapTiler. Paste the key into `MAPTILER_KEY` in **`js/config.js`**. Before going live, check the tileset IDs in that file against MapTiler's NLS catalogue. The credit "Courtesy of the National Library of Scotland" is already shown.
 
@@ -119,8 +123,8 @@ The **Land** tab covers the parish's rocks, the shape of the land, the Ridgeway,
 
   | Layer | Status | Licence and credit |
   |---|---|---|
-  | Habitats: Natural England Priority Habitat Inventory | ✅ Works (checked) | Open Government Licence v3. "© Natural England copyright. Contains Ordnance Survey data © Crown copyright and database right." |
-  | Rocks: British Geological Survey 1:625,000 geology | ⏳ Disabled | Open Government Licence. "Contains British Geological Survey materials © UKRI." The BGS map server couldn't be reached while building, so the layer name `GBR_BGS_625k_BLS` is unconfirmed. Check it with a GetCapabilities request to `https://ogc.bgs.ac.uk/cgi-bin/BGS_Bedrock_and_Superficial_Geology/ows`, then remove `disabled` and `missing` from the `geology` entry in `js/config.js`. |
+  | Habitats: Natural England's Living England habitat map | ✅ Works | Made freely available by Defra and Natural England (Open Government Licence). Credit: "Living England © Natural England". The earlier Priority Habitat Inventory only covered about 4% of the parish, so it looked almost the same as today's map. |
+  | Rocks: British Geological Survey 1:625,000 geology | ✅ Works | Open Government Licence. Credit: "Contains British Geological Survey materials © UKRI". Layer `GBR_BGS_625k_BLS`; the key's three units were checked with the server's feature info. |
 
   The more detailed BGS 1:50,000 geology isn't included: its data is commercially licensed, so ask BGS first.
 - **Illustrations:** the cross-section and vignettes are in **`js/land-art.js`**. To use hand-painted scans, add them to `ART_IMAGES` in `js/config.js` with these keys: `cross-section`, `section-rocks`, `section-shape`, `section-ridgeway`, `section-water`, `section-soils`, `section-living`, `section-change`, `red-kite`, `species-skylark`, `species-yellowhammer`, `species-kestrel`, `species-brown-hare`, `species-marbled-white`, `species-rock-rose`, `species-wild-thyme`, `species-knapweed`, `fossil-urchin`. Paint the cross-section to the same frame as the drawing (640 × 230), so the labels still line up, or bake the labels into the painting.
@@ -146,10 +150,6 @@ The illustrations are drawn in code, in an ink-and-watercolour style. To use rea
 2. List it in `ART_IMAGES` in **`js/config.js`**, for example `"tower": "art/tower.webp"`.
 
 The slot names are `tower`, `era-pre`, `era-saxon`, `era-med`, `era-ref`, `era-mod`, `era-atom`, `knob`, `envelope` and `story-anvil`, `story-label`, `story-slate`, `story-jar`, `story-plane`, `story-quill`, `story-bell`, `story-house`.
-
-## Clock reminders
-
-"Remind me" sends a notification five minutes before each tune while the app is open or running in the background. Reminders that arrive when the app is fully closed would need a small push server. That can be added later.
 
 ## After changing files
 

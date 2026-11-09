@@ -29,11 +29,6 @@ export function timelineView(root) {
             <p class="clock-until"></p>
           </div>
           <ul class="bells" aria-label="Today’s tunes"></ul>
-          <button type="button" class="btn-outline remind" aria-pressed="false">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            <span>Remind me</span>
-          </button>
-          <p class="remind-note" role="status"></p>
         </div>
       </section>
 
@@ -78,21 +73,6 @@ export function timelineView(root) {
   };
   paint();
   const tick = setInterval(paint, 30000);
-
-  const remind = $(".remind");
-  const showRemind = () => {
-    const on = clock.reminderOn();
-    remind.setAttribute("aria-pressed", String(on));
-    remind.querySelector("span").textContent = on ? "Reminder on" : "Remind me";
-  };
-  showRemind();
-  remind.addEventListener("click", async () => {
-    const on = !clock.reminderOn();
-    const res = await clock.setReminder(on);
-    $(".remind-note").textContent = !res.ok ? res.reason
-      : on ? "We’ll remind you five minutes before each tune while the app is open." : "";
-    showRemind();
-  });
 
   // Era rail: smooth jump, and highlight the era you're reading.
   const scroller = root.closest(".view");
@@ -206,21 +186,24 @@ function storyItem(s) {
   const long = isLong(s);
   const first = paragraphs(s.body)[0] || "";
   const by = byline(s);
+  const href = `#/story/${esc(s.id)}`;
   return `<li><article class="story">
     <div class="story-head">
       <div>
-        <h3>${esc(s.title)}</h3>
+        <h3><a class="story-title" href="${href}">${esc(s.title)}</a></h3>
         ${by ? `<p class="who">${esc(by)}</p>` : ""}
         ${folkNote(s)}
       </div>
       ${s.artwork ? art(s.artwork, { width: 84, height: 84 }) : ""}
     </div>
     <div class="story-text">${long ? `<p>${esc(first)}</p>` : paras(s.body)}</div>
-    ${long ? `<a class="link more" href="#/story/${esc(s.id)}">Read the full story</a>` : ""}
-    <p class="sources"><b>Source:</b> ${esc(s.source)}${s.credit && s.type !== "Memory" ? ` · Shared by ${esc(s.credit)}` : ""}
-      ${s.coordinates ? ` · <a href="#/map/${esc(s.id)}">Show on map</a>` : ""}${long ? "" : ` · <a href="#/story/${esc(s.id)}">Link</a>`}</p>
+    <p class="story-links"><a class="link" href="${href}">Read the full story</a>${s.coordinates ? `<a class="link" href="#/map/${esc(s.id)}">Show on map</a>` : ""}</p>
   </article></li>`;
 }
+
+// Colour for each type in the section rail (same idea as the timeline's era rail).
+const TYPE_COLOURS = { History: "#2f4f8a", Memory: "#2f6f6a", Legend: "#8c3b2c", "Folk tale": "#5b4a78", "Ghost story": "#3d4540" };
+const typeSlug = (t) => t.toLowerCase().replace(/[^a-z]+/g, "-");
 
 export function storiesView(root) {
   let filter = store.get("eh.storyCat", "All");
@@ -232,9 +215,13 @@ export function storiesView(root) {
     <div class="page">
       <header class="masthead">
         <h1>Village <em>voices</em></h1>
-        <p class="lede">Blacksmiths, evacuees, schoolchildren and a letter-writing parson, plus the legends and ghost stories the village still tells.</p>
+        <p class="lede">Blacksmiths, evacuees, a letter-writing parson and the parish fire brigade, plus the legends and ghost stories the village still tells.</p>
       </header>
-      <nav class="tabs-inline" aria-label="Filter by topic"></nav>
+      <div class="cat-filter">
+        <label for="story-cat">Category</label>
+        <span class="select-wrap"><select id="story-cat"></select></span>
+      </div>
+      <nav class="rail type-rail" aria-label="Jump to a kind of story"></nav>
       <div class="story-sections"><p class="empty-note">Loading stories…</p></div>
       <section class="cta">
         <div>
@@ -246,21 +233,43 @@ export function storiesView(root) {
       </section>
     </div>`;
 
-  const nav = root.querySelector(".tabs-inline");
+  const select = root.querySelector("#story-cat");
+  const rail = root.querySelector(".type-rail");
   const box = root.querySelector(".story-sections");
+  const scroller = root.closest(".view");
   let stories = [];
+  let io = null;
+  const smooth = () => (matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
+
+  const highlight = (id) => {
+    rail.querySelectorAll("a").forEach((a) => {
+      const on = a.dataset.type === id;
+      a.classList.toggle("on", on);
+      if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
+      if (on) {
+        const left = a.offsetLeft - 10, right = a.offsetLeft + a.offsetWidth + 10;
+        if (left < rail.scrollLeft) rail.scrollTo({ left, behavior: "smooth" });
+        else if (right > rail.scrollLeft + rail.clientWidth) rail.scrollTo({ left: right - rail.clientWidth, behavior: "smooth" });
+      }
+    });
+  };
 
   const paint = () => {
-    const cats = ["All", ...[...new Set(stories.map((s) => s.category || "Other"))].sort((a, b) => (a === "Other") - (b === "Other") || a.localeCompare(b))];
-    if (!cats.includes(filter)) filter = "All";
-    nav.innerHTML = cats.map((c) => `<button type="button" data-cat="${esc(c)}" aria-pressed="${c === filter}">${esc(c)}</button>`).join("");
+    const cats = [...new Set(stories.map((s) => s.category || "Other"))].sort((a, b) => (a === "Other") - (b === "Other") || a.localeCompare(b));
+    if (filter !== "All" && !cats.includes(filter)) filter = "All";
+    select.innerHTML = [`<option value="All">All categories</option>`, ...cats.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`)].join("");
+    select.value = filter;
     const shown = stories.filter((s) => filter === "All" || (s.category || "Other") === filter);
-    const sections = TYPES.map((t) => {
-      const items = shown.filter((s) => s.type === t.id)
-        .sort((a, b) => (b.featured - a.featured) || ((a.sortYear ?? 99999) - (b.sortYear ?? 99999)));
-      if (!items.length) return "";
+    const present = TYPES.map((t) => ({ t, items: shown.filter((s) => s.type === t.id)
+      .sort((a, b) => (b.featured - a.featured) || ((a.sortYear ?? 99999) - (b.sortYear ?? 99999))) })).filter((x) => x.items.length);
+
+    rail.innerHTML = present.map(({ t, items }) =>
+      `<a href="#type-${typeSlug(t.id)}" data-type="${esc(t.id)}" style="--c:${TYPE_COLOURS[t.id] || "#2f4f8a"}"><span class="dot"></span>${esc(t.label)} <span class="rail-count">${items.length}</span></a>`).join("");
+    rail.hidden = present.length < 2;
+
+    box.innerHTML = present.map(({ t, items }) => {
       const open = openState[t.id] !== false;
-      return `<details class="story-section" data-type="${esc(t.id)}" ${open ? "open" : ""}>
+      return `<details class="story-section" id="type-${typeSlug(t.id)}" data-type="${esc(t.id)}" style="--c:${TYPE_COLOURS[t.id] || "#2f4f8a"}" ${open ? "open" : ""}>
         <summary>
           <span class="sec-title"><h2>${esc(t.label)}</h2><span class="count">${items.length}</span></span>
           <span class="sec-blurb">${esc(t.blurb)}</span>
@@ -268,18 +277,33 @@ export function storiesView(root) {
         </summary>
         <ol class="stories">${items.map(storyItem).join("")}</ol>
       </details>`;
-    }).join("");
-    box.innerHTML = sections || `<p class="empty-note">No stories about this yet. <a href="${esc(STORY_FORM_URL || MUSEUM_URL)}" target="_blank" rel="noopener">Know one?</a></p>`;
+    }).join("") || `<p class="empty-note">No stories about this yet. <a href="${esc(STORY_FORM_URL || MUSEUM_URL)}" target="_blank" rel="noopener">Know one?</a></p>`;
+
     box.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => {
       openState[d.dataset.type] = d.open;
       store.set("eh.storySections", openState);
     }));
+    if (io) io.disconnect();
+    io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) highlight(en.target.dataset.type); });
+    }, { root: scroller, rootMargin: "-20% 0px -70% 0px" });
+    box.querySelectorAll(".story-section").forEach((d) => io.observe(d));
+    if (present[0]) highlight(present[0].t.id);
   };
 
-  nav.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-cat]");
-    if (!b) return;
-    filter = b.dataset.cat;
+  rail.addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-type]");
+    if (!a) return;
+    e.preventDefault();
+    const sec = box.querySelector(`.story-section[data-type="${CSS.escape(a.dataset.type)}"]`);
+    if (!sec) return;
+    if (!sec.open) sec.open = true;
+    sec.scrollIntoView({ behavior: smooth(), block: "start" });
+    highlight(a.dataset.type);
+  });
+
+  select.addEventListener("change", () => {
+    filter = select.value;
     store.set("eh.storyCat", filter);
     paint();
   });
@@ -291,7 +315,7 @@ export function storiesView(root) {
     if (!list.length) { box.innerHTML = `<p class="empty-note">Couldn’t load the stories. Check your connection and try again.</p>`; return; }
     paint();
   });
-  return () => { alive = false; };
+  return () => { alive = false; if (io) io.disconnect(); };
 }
 
 // ---------- One story ----------
@@ -348,7 +372,8 @@ export function storyView(root, id) {
 export function walkView(root) {
   const stops = WALK.stops.map((s, i) => ({ ...s, i, site: siteOf(s.site), entryObj: entryOf(s.entry) }));
   const total = stops.length;
-  let step = Math.min(store.get("eh.walkStep", 0), total);
+  // The key changed when the route was reordered (Nov 2026), so old progress is ignored safely.
+  let step = Math.min(Math.max(0, Number(store.get("eh.walk7", 0)) || 0), total);
   let open = null, toast = null;
   const strip = stripMap(stops);
 
@@ -383,7 +408,7 @@ export function walkView(root) {
     </div>`;
 
   const $ = (q) => root.querySelector(q);
-  const save = () => store.set("eh.walkStep", step);
+  const save = () => store.set("eh.walk7", step);
 
   function paint() {
     const finished = step >= total;
@@ -404,7 +429,7 @@ export function walkView(root) {
     $(".current").className = `current ${finished ? "done" : ""}`;
     $(".current").innerHTML = finished ? `
         <h2>Walk complete</h2>
-        <p>Eight stops and eight centuries. Still have legs? Head up to Scutchamer Knob on the Ridgeway.</p>
+        <p>Seven stops and eight centuries of village history. Still have legs? Head up to Scutchamer Knob on the Ridgeway.</p>
         <button type="button" class="btn-outline" data-act="restart">Start again</button>`
       : `
         <p class="era-line">Stop ${step + 1} of ${total} · ${esc(era.name)}, ${esc(cur.entryObj.date)}</p>
@@ -435,7 +460,8 @@ export function walkView(root) {
     }).join("");
   }
 
-  root.addEventListener("click", (e) => {
+  // Listen on this screen's own element, not the shared #view, so handlers don't pile up between visits.
+  root.querySelector(".page").addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b) return;
     const act = b.dataset.act;

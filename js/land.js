@@ -68,9 +68,20 @@ function redKitePanel(k) {
   </section>`;
 }
 
+// Each section has its own colour band, like the eras on the timeline.
+const SECTION_COLOURS = {
+  rocks: "#6d6a5f",    // flint grey
+  shape: "#5f6a3e",    // turf
+  ridgeway: "#8a5a14", // ochre: the chalk track
+  water: "#2f5f8a",    // brook blue
+  soils: "#7a5a32",    // umber
+  living: "#2f6f6a",   // verdigris
+  change: "#5b4a78"    // oak-gall violet
+};
+
 function sectionHtml(s, data, open) {
   const living = s.id === "living";
-  return `<details class="land-section${s.feature ? " feature" : ""}" id="land-${esc(s.id)}" data-id="${esc(s.id)}" ${open ? "open" : ""}>
+  return `<details class="land-section" id="land-${esc(s.id)}" data-id="${esc(s.id)}" style="--c:${SECTION_COLOURS[s.id] || "#5f6a3e"}" ${open ? "open" : ""}>
     <summary>
       <span class="ls-title"><h2>${esc(s.title)}</h2></span>
       <span class="ls-summary">${esc(s.summary)}</span>

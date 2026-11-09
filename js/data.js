@@ -94,21 +94,21 @@ export const ENTRIES = [
 export const SITES = [
   { id: "church", n: 1, name: "St Augustine’s Church", short: "St Augustine’s", lat: 51.5945, lng: -1.3383, entry: "clock",
     spot: "Hear the faceless clock play at 9am, noon, 3pm or 6pm. The wool merchants’ brasses are in the north transept." },
-  { id: "champs", n: 2, name: "Champs Chapel", short: "Champs Chapel", lat: 51.597, lng: -1.3366, entry: "champs-chapel",
+  { id: "champs", n: 6, name: "Champs Chapel", short: "Champs Chapel", lat: 51.597, lng: -1.3366, entry: "champs-chapel",
     spot: "Built by the Sheen monks, later a pigeon-house and bakehouse. Now the Hendred Museum, open weekend afternoons in season." },
-  { id: "kings-manor", n: 3, name: "King’s Manor", short: "King’s Manor", lat: 51.5964, lng: -1.3368, entry: "carthusians",
+  { id: "kings-manor", n: 5, name: "King’s Manor", short: "King’s Manor", lat: 51.5964, lng: -1.3368, entry: "carthusians",
     spot: "A timber-framed house with its original gatehouse, given to the Carthusians of Sheen by Henry V." },
-  { id: "hendred-house", n: 4, name: "Hendred House & St Amand’s", short: "Hendred House", lat: 51.5946, lng: -1.336, entry: "st-amand",
+  { id: "hendred-house", n: 3, name: "Hendred House & St Amand’s", short: "Hendred House", lat: 51.5946, lng: -1.336, entry: "st-amand",
     spot: "Home of the Eystons since the 1440s. A private house: the chapel opens on occasional open days." },
-  { id: "st-marys", n: 5, name: "St Mary’s Catholic Church", short: "St Mary’s", lat: 51.5938, lng: -1.3363, entry: "st-marys",
+  { id: "st-marys", n: 2, name: "St Mary’s Catholic Church", short: "St Mary’s", lat: 51.5938, lng: -1.3363, entry: "st-marys",
     spot: "Designed by Charles Alban Buckler and linked to its presbytery by a timber gallery." },
-  { id: "eyston-arms", n: 6, name: "The Eyston Arms", short: "Eyston Arms", lat: 51.5962, lng: -1.3362, entry: "eystons",
+  { id: "eyston-arms", n: 4, name: "The Eyston Arms", short: "Eyston Arms", lat: 51.5962, lng: -1.3362, entry: "eystons",
     spot: "Named after the family at Hendred House. Ask about Captain George Eyston’s land speed record." },
   { id: "orchard", n: 7, name: "Orchard House, Cat Street", short: "Orchard House", lat: 51.5966, lng: -1.3382, entry: "harwell",
     spot: "A blue plaque marks the home of William Penney, Baron Penney of East Hendred." },
-  { id: "mill", n: 8, name: "Mill by Ludbridge", short: "Ludbridge Mill", lat: 51.6025, lng: -1.3444, entry: "domesday",
+  { id: "mill", n: null, name: "Mill by Ludbridge", short: "Ludbridge Mill", lat: 51.6025, lng: -1.3444, entry: "domesday",
     spot: "The mill on the brook stands where a Domesday mill probably stood." },
-  { id: "knob", n: 9, name: "Scutchamer Knob & the Ridgeway", short: "Scutchamer Knob", lat: 51.5624, lng: -1.3428, entry: "cwichelm",
+  { id: "knob", n: null, name: "Scutchamer Knob & the Ridgeway", short: "Scutchamer Knob", lat: 51.5624, lng: -1.3428, entry: "cwichelm",
     spot: "South of the village, up on the downs. The mound sits in woodland just off the Ridgeway National Trail." }
 ];
 
@@ -137,23 +137,22 @@ export const WALK = {
     ["Ground", "[Pavement and lanes?]"],
     ["Step-free", "[To confirm]"]
   ],
+  // Walk order (pins on the map carry the same numbers; the mill and Scutchamer Knob have no stop number).
   stops: [
     { site: "church", entry: "clock", getThere: "Start in the churchyard.",
       look: "the medieval lectern inside: a carved foot standing on three winged beasts." },
-    { site: "champs", entry: "champs-chapel", getThere: null,
-      look: "the west end, where the Champ family inserted an upper floor." },
-    { site: "kings-manor", entry: "carthusians", getThere: null,
-      look: "the original gatehouse of the timber-framed manor." },
-    { site: "hendred-house", entry: "st-amand", getThere: null,
-      look: "the house from the High Street. It’s a private home, with St Amand’s Chapel inside." },
     { site: "st-marys", entry: "st-marys", getThere: null,
       look: "the timber gallery linking church and presbytery." },
+    { site: "hendred-house", entry: "st-amand", getThere: null,
+      look: "the house from the High Street. It’s a private home, with St Amand’s Chapel inside." },
     { site: "eyston-arms", entry: "eystons", getThere: null,
       look: "the pub sign, named for the family at Hendred House. Then ask about Captain George Eyston’s land speed record." },
+    { site: "kings-manor", entry: "carthusians", getThere: null,
+      look: "the original gatehouse of the timber-framed manor." },
+    { site: "champs", entry: "champs-chapel", getThere: null,
+      look: "the west end, where the Champ family inserted an upper floor." },
     { site: "orchard", entry: "harwell", getThere: null,
-      look: "the blue plaque for William Penney." },
-    { site: "mill", entry: "domesday", getThere: null,
-      look: "the brook and the mill, on the site of a Domesday mill worth 20 shillings." }
+      look: "the blue plaque for William Penney." }
   ]
 };
 

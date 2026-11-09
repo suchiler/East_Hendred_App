@@ -13,11 +13,12 @@ const nls = (tileset) => MAPTILER_KEY
 
 export const MAP_LAYERS = [
   { id: "painted", name: "Painted", full: "Painted map", swatch: "#adc189",
-    title: "Painted map · Map data © OpenStreetMap contributors", credit: "Traced from OpenStreetMap, painted for this app", kind: "painted" },
+    title: "Painted map", credit: "Traced from OpenStreetMap, painted for this app", kind: "painted",
+    attribution: 'Painted for this app from map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' },
   { id: "today", name: "Today", full: "Today", swatch: "#f7d774",
-    title: "Today · © OpenStreetMap contributors", credit: "© OpenStreetMap contributors", kind: "tiles",
+    title: "Today’s map", credit: "© OpenStreetMap contributors", kind: "tiles",
     url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' },
+    attribution: 'Map &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' },
   { id: "1920s", name: "1920s", full: "1920s: OS One-inch, Popular Edition", swatch: "#e08a4a",
     title: "OS One-inch, 1919–26 · courtesy of NLS", credit: "Courtesy of the National Library of Scotland", kind: "tiles",
     url: nls("uk-osgb63k1919"), maxZoom: 15,
@@ -33,21 +34,24 @@ export const MAP_LAYERS = [
     url: "", maxZoom: 17, attribution: "",
     missing: "Needs a scan lined up with today’s map" },
   // Overlays: a semi-transparent WMS layer drawn over today's OpenStreetMap.
-  { id: "habitats", name: "Habitats", full: "Habitats: Natural England priority habitats", swatch: "#7f9a65",
-    title: "Priority habitats · © Natural England, OGL", credit: "© Natural England · Open Government Licence", kind: "overlay",
-    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19,
-    wms: { url: "https://environment.data.gov.uk/spatialdata/priority-habitat-inventory-england/wms",
-      layers: "Priority_Habitat_Inventory_England", opacity: 0.65 },
-    attribution: '&copy; Natural England copyright. Contains Ordnance Survey data &copy; Crown copyright and database right 2026. <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL v3</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' },
-  // British Geological Survey 1:625,000 bedrock geology (Open Government Licence).
-  // The BGS map server couldn't be reached while building this, so the layer name is
-  // unconfirmed: check GetCapabilities, then delete `disabled` and `missing`.
-  { id: "geology", name: "Geology", full: "Rocks: BGS geology, 1:625,000", swatch: "#c9b98a",
-    title: "Bedrock geology · Contains British Geological Survey materials © UKRI", credit: "British Geological Survey · Open Government Licence", kind: "overlay",
-    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19,
-    wms: { url: "https://ogc.bgs.ac.uk/cgi-bin/BGS_Bedrock_and_Superficial_Geology/ows", layers: "GBR_BGS_625k_BLS", opacity: 0.6 },
-    attribution: 'Contains <a href="https://www.bgs.ac.uk/">British Geological Survey</a> materials &copy; UKRI 2026. <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL v3</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    disabled: true, missing: "Coming soon: the geology map server still needs checking" }
+  // Living England (Natural England) covers every field, so habitats show clearly.
+  { id: "habitats", name: "Habitats", full: "Habitats: Natural England’s Living England map", swatch: "#38a800",
+    title: "Habitats (Living England)", credit: "© Natural England · Open Government Licence", kind: "overlay",
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19, zoom: 14,
+    wms: { url: "https://environment.data.gov.uk/spatialdata/living-england-habitat-map-phase4/wms",
+      layers: "Living_England_Habitat_Map_Phase_4", opacity: 0.6 },
+    attribution: 'Habitats: Living England &copy; Natural England, <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" target="_blank" rel="noopener">OGL</a> · Map &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+    key: [["Arable and horticultural", "#ffd37f"], ["Grassland (chalk, acid, neutral)", "#ffbee8"], ["Improved grassland", "#cdf57a"],
+      ["Broadleaved and mixed woodland", "#38a800"], ["Coniferous woodland", "#00a884"], ["Scrub", "#897044"],
+      ["Built-up areas and gardens", "#343434"], ["Water", "#bee8ff"]] },
+  // British Geological Survey 1:625,000 bedrock (Open Government Licence). Broad bands only at village scale.
+  { id: "geology", name: "Geology", full: "Rocks: BGS bedrock geology, 1:625,000", swatch: "#cdfd35",
+    title: "Bedrock geology (BGS 1:625,000)", credit: "British Geological Survey · Open Government Licence", kind: "overlay",
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19, zoom: 13,
+    wms: { url: "https://ogc.bgs.ac.uk/cgi-bin/BGS_Bedrock_and_Superficial_Geology/ows", layers: "GBR_BGS_625k_BLS", opacity: 0.55 },
+    // Units under the parish, checked with the BGS server's feature info (Nov 2026).
+    key: [["Gault clay and Upper Greensand (the Vale and village)", "#33ffaf"], ["Grey Chalk (the shelf)", "#c9ff33"], ["White Chalk (the scarp and Ridgeway)", "#dbff54"]],
+    attribution: 'Rocks: contains <a href="https://www.bgs.ac.uk/" target="_blank" rel="noopener">British Geological Survey</a> materials &copy; UKRI, <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" target="_blank" rel="noopener">OGL</a> · Map &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' }
 ];
 
 // A layer is usable when it has tiles and isn't switched off.
