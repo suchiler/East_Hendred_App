@@ -155,11 +155,13 @@ export function mapView(root, { sel } = {}) {
   };
 
   function clampView() {
-    const { W, H, b } = visible();
+    const { W, H, t, b, r } = visible();
     const w = MAP_W * S(), h = MAP_H * S();
-    view.dx = w <= W ? (W - w) / 2 : Math.min(0, Math.max(W - w, view.dx));
-    // The map's bottom edge may rise to the top of the place sheet, so places near it aren't hidden.
-    view.dy = h <= H ? (H - h) / 2 : Math.min(0, Math.max(Math.min(H, b) - h, view.dy));
+    // The map may slide in from under the side panel (landscape), down from under the header,
+    // and up from under the place sheet, so places near any edge can be shown.
+    const vw = Math.min(W, r);
+    view.dx = w <= vw ? (vw - w) / 2 : Math.min(0, Math.max(vw - w, view.dx));
+    view.dy = h <= H ? (H - h) / 2 : Math.min(t, Math.max(Math.min(H, b) - h, view.dy));
   }
 
   function centreOn(lat, lng) {
@@ -185,6 +187,9 @@ export function mapView(root, { sel } = {}) {
       const it = state.items.find((x) => x.key === state.sel);
       const c = it && project(it.lat, it.lng).inside ? [it.lat, it.lng] : VILLAGE_CENTRE;
       centreOn(c[0], c[1]);
+      // A deep-linked place opens its sheet (a side panel in landscape) after this first layout,
+      // so centre again once it has its size.
+      if (it) requestAnimationFrame(() => { if (state.sel === it.key && c !== VILLAGE_CENTRE) { centreOn(c[0], c[1]); applyView(); } });
     }
     applyView();
   };
