@@ -43,6 +43,52 @@ function crossSection(cs) {
   return `<svg class="xsec-art" viewBox="${d.vb}" style="aspect-ratio:${w} / ${h}" role="img" aria-label="${label}" preserveAspectRatio="xMidYMid meet">${d.svg}</svg>${sr}`;
 }
 
+// ---- This month: what to look for now, worked out from each species' "when" text ----
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+const SEASONS = { spring: [2, 3, 4], summer: [5, 6, 7], autumn: [8, 9, 10], winter: [11, 0, 1] };
+const monthIdx = (w) => MONTHS.indexOf(w.slice(0, 3).toLowerCase());
+const span = (a, b) => { const out = []; for (let m = a; ; m = (m + 1) % 12) { out.push(m); if (m === b) break; } return out; };
+// "Song from February to July; flocks in winter" -> the months it mentions; "All year" -> all.
+export function monthsFor(when = "") {
+  const ms = new Set();
+  const t = when.toLowerCase();
+  for (const m of t.matchAll(/([a-z]+)\s*(?:–|-|to)\s*([a-z]+)/g)) {
+    const [a, b] = [m[1], m[2]];
+    if (monthIdx(a) >= 0 && monthIdx(b) >= 0) span(monthIdx(a), monthIdx(b)).forEach((x) => ms.add(x));
+    else if (SEASONS[a] && SEASONS[b]) [...SEASONS[a], ...SEASONS[b]].forEach((x) => ms.add(x));
+  }
+  for (const [name, list] of Object.entries(SEASONS)) if (t.includes(name)) list.forEach((x) => ms.add(x));
+  return ms;
+}
+function thisMonth(species = [], kite) {
+  const now = new Date().getMonth();
+  const monthName = new Date(2000, now, 1).toLocaleString("en-GB", { month: "long" });
+  const list = [...species.map((s) => ({ id: s.name, name: s.name, when: s.when, allYear: /all year/i.test(s.when) })),
+    ...(kite ? [{ id: "Red kite", name: "Red kite", when: "All year", allYear: true }] : [])];
+  // Best now: seasonal species in season, and all-year ones with a "best in…" note that fits.
+  const best = list.filter((s) => monthsFor(s.when.replace(/^all year;?/i, "")).has(now));
+  const around = list.filter((s) => s.allYear && !best.includes(s));
+  const seen = store.get(`eh.seen.${new Date().getFullYear()}-${now + 1}`, []);
+  const row = (s) => `<li><label><input type="checkbox" data-seen="${esc(s.id)}" ${seen.includes(s.id) ? "checked" : ""}>
+    <span><span class="tm-name">${esc(s.name)}</span> <span class="tm-when">${esc(s.when)}</span></span></label></li>`;
+  return `<section class="this-month" aria-labelledby="tm-h">
+    <h3 id="tm-h">This month: ${esc(monthName)}</h3>
+    <p class="tm-note">Tick what you spot. Your ticks are saved on this phone and start again next month.</p>
+    ${best.length ? `<p class="tm-sub">Best now</p><ul>${best.map(row).join("")}</ul>` : ""}
+    ${around.length ? `<p class="tm-sub">Around all year</p><ul>${around.map(row).join("")}</ul>` : ""}
+  </section>`;
+}
+
+function glossaryHtml(g) {
+  if (!g || !g.terms) return "";
+  return `<section class="glossary" id="land-names" aria-labelledby="names-h">
+    <h2 id="names-h">Local names</h2>
+    ${g.intro ? `<p class="g-intro">${esc(g.intro)}</p>` : ""}
+    <dl>${g.terms.map((t) => `<div><dt>${esc(t.term)}${t.folklore ? ` <span class="folklore">‡ folklore</span>` : ""}</dt>
+      <dd>${esc(t.text)} <span class="g-src">Source: ${esc(t.source)}</span></dd></div>`).join("")}</dl>
+  </section>`;
+}
+
 function speciesList(species = [], further) {
   return `<section class="species" aria-labelledby="species-h">
     <h3 id="species-h">What you might see</h3>
@@ -92,7 +138,7 @@ function sectionHtml(s, data, open) {
     <div class="ls-body">
       ${s.art ? `<div class="ls-art">${art(s.art, { className: "vignette" })}</div>` : ""}
       ${paras(s.body)}
-      ${living ? speciesList(data.species, data.speciesFurther) + redKitePanel(data.redKite) : ""}
+      ${living ? thisMonth(data.species, data.redKite) + speciesList(data.species, data.speciesFurther) + redKitePanel(data.redKite) : ""}
       ${s.lookFor ? `<p class="look"><b>Look for</b> ${esc(s.lookFor)}</p>` : ""}
       ${s.place ? `<a class="link" href="#/map/${esc(s.place)}">Show on the map</a>` : ""}
       ${s.issues ? `<section class="issues" aria-labelledby="issue-${esc(s.id)}">
@@ -125,6 +171,7 @@ export function landView(root, arg) {
             <p class="meta"><span>Rocks, water and living things</span><span class="gridref">85–208 m</span></p>
             <h1>The <em>land</em></h1>
             <p class="lede">How chalk, clay and water put the village where it is, shaped its history, and what to look for on a walk today.</p>
+            ${data.glossary ? `<p class="masthead-link"><a href="#/land/names">Local names explained</a></p>` : ""}
           </header>
         </div>
         <figure class="xsec">
@@ -150,6 +197,7 @@ export function landView(root, arg) {
             ${data.sections.map((s) => `<a href="#land-${esc(s.id)}" data-id="${esc(s.id)}" style="--c:${SECTION_COLOURS[s.id] || "#5f6a3e"}"><span class="dot"></span>${esc(RAIL_NAMES[s.id] || s.title)}</a>`).join("")}
           </nav>
           <div class="land-sections">${data.sections.map((s) => sectionHtml(s, data, !!openState[s.id])).join("")}</div>
+          ${glossaryHtml(data.glossary)}
           <section class="afield" aria-labelledby="afield-h">
             <h2 id="afield-h">Further afield</h2>
             <ul>${(data.furtherAfield || []).map((f) => `<li>${ext(f.url, f.name)}<span>${esc(f.why)}</span></li>`).join("")}</ul>
@@ -157,6 +205,13 @@ export function landView(root, arg) {
         </div>
       </div>`;
 
+    root.querySelectorAll("[data-seen]").forEach((cb) => cb.addEventListener("change", () => {
+      const now = new Date();
+      const key = `eh.seen.${now.getFullYear()}-${now.getMonth() + 1}`;
+      const seen = new Set(store.get(key, []));
+      if (cb.checked) seen.add(cb.dataset.seen); else seen.delete(cb.dataset.seen);
+      store.set(key, [...seen]);
+    }));
     root.querySelectorAll(".land-section").forEach((d) => d.addEventListener("toggle", () => {
       openState[d.dataset.id] = d.open;
       store.set("eh.landSections", openState);

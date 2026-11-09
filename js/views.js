@@ -19,6 +19,7 @@ export function timelineView(root) {
         <p class="meta"><span>Vale of White Horse, Oxfordshire</span><span class="gridref">SU 459 887</span></p>
         <h1>East Hendred <em>through time</em></h1>
         <p class="lede">A cloth town, a family that never left, and a church clock made in 1525 that still plays a hymn tune every three hours. Start at the surface and dig down.</p>
+        <p class="masthead-link"><a href="#/land/names">Local names explained</a></p>
       </header>
 
       <section class="clock" aria-labelledby="clock-h">
@@ -200,6 +201,17 @@ function storyItem(s) {
   </article></li>`;
 }
 
+// Open questions from the research, shown as appeals under the stories.
+const OPEN_QUESTIONS = [
+  "Which cottage had the ghostly Roundheads seen only from the ankles up?",
+  "Where were the Golden Mile and Paternoster Bank?",
+  "When did the Whitsun feast on the green stop?",
+  "Was Arthur Harrison, who overhauled the church clock in 1961, one of the Harrison blacksmiths?",
+  "Are Wilkins Shop and “Mr Wickens’ shop” the same place?",
+  "Where exactly are the springs that feed the brook?",
+  "Do you remember the village flooding, from the brook or from groundwater?"
+];
+
 // Colour for each type in the section rail (same idea as the timeline's era rail).
 const TYPE_COLOURS = { History: "#2f4f8a", Memory: "#2f6f6a", Legend: "#8c3b2c", "Folk tale": "#5b4a78", "Ghost story": "#3d4540" };
 const typeSlug = (t) => t.toLowerCase().replace(/[^a-z]+/g, "-");
@@ -222,6 +234,11 @@ export function storiesView(root) {
       </div>
       <nav class="rail type-rail" aria-label="Jump to a kind of story"></nav>
       <div class="story-sections"><p class="empty-note">Loading stories…</p></div>
+      <section class="help-find" aria-labelledby="help-h">
+        <h2 id="help-h">Help us find out</h2>
+        <p>Some things the records don’t say. If you know, tell us.</p>
+        <ul>${OPEN_QUESTIONS.map((q) => `<li>${STORY_FORM_URL ? `<a href="${esc(STORY_FORM_URL)}" target="_blank" rel="noopener">${esc(q)}<span class="sr-only"> (opens the story form)</span></a>` : esc(q)}</li>`).join("")}</ul>
+      </section>
       ${STORY_FORM_URL ? `<section class="cta">
         <div>
           <h2>Do you remember?</h2>

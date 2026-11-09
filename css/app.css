@@ -669,3 +669,24 @@ button { font: inherit; color: inherit; }
 .rail a { min-height: 38px; padding: 0 6px; gap: 5px; font-size: 0.875rem; }
 .rail .rail-count { font-size: 0.8rem; }
 .rail.tall { position: static; }
+.masthead-link { font-size: 0.9412rem; font-weight: 600; margin-top: 8px; }
+.help-find { margin-top: 28px; }
+.help-find h2 { font-size: 1.6471rem; }
+.help-find p { color: var(--soft); margin-top: 6px; }
+.help-find ul { margin: 12px 0 0; padding-left: 20px; display: grid; gap: 10px; }
+.glossary { margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--ink); scroll-margin-top: 16px; }
+.glossary h2 { font-size: 1.6471rem; }
+.g-intro { color: var(--soft); margin-top: 6px; }
+.glossary dl { margin: 14px 0 0; display: grid; gap: 14px; }
+.glossary dt { font-family: var(--display); font-size: 1.1765rem; line-height: 1.25; }
+.glossary dd { margin: 2px 0 0; line-height: 1.5; }
+.g-src { display: block; font-size: 0.875rem; color: var(--muted); margin-top: 2px; }
+.this-month { margin: 4px 0 18px; padding: 12px 14px; border: 1.5px solid var(--c); border-radius: 4px; background: rgba(47, 111, 106, 0.06); }
+.this-month h3 { font-size: 1.2941rem; }
+.tm-note { font-size: 0.875rem; color: var(--muted); margin-top: 2px; }
+.tm-sub { font-size: 0.875rem; font-weight: 600; margin-top: 10px; }
+.this-month ul { list-style: none; margin: 4px 0 0; padding: 0; }
+.this-month label { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; padding: 8px 0; cursor: pointer; }
+.this-month input { width: 22px; height: 22px; margin: 1px 0 0; flex-shrink: 0; accent-color: var(--c); }
+.tm-name { font-weight: 600; }
+.tm-when { display: block; font-size: 0.875rem; color: var(--soft); }

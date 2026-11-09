@@ -683,5 +683,81 @@
   "Does the village itself lie inside the North Wessex Downs National Landscape, or only the downs?",
   "Golden Mile Row North/South are named woodland strips east of the village (OSM) — do they relate to the 'Golden Mile' cloth-fair legend?",
   "Is there a parish species list available from TVERC to confirm which species to feature?"
- ]
+ ],
+ "glossary": {
+  "intro": "Names you’ll meet in the app and on a walk. Where a meaning is a guess, it says so.",
+  "terms": [
+   {
+    "term": "Scutchamer Knob (Cuckhamsley Hill)",
+    "text": "The round barrow beside the Ridgeway south of the village. Both names are thought to come from its Old English name, Cwichelmeshlæw, ‘Cwichelm’s barrow’, recorded in 1006; how it turned into ‘Scutchamer’ isn’t known.",
+    "source": "Historic England list entry 1006312; Victoria County History, Berkshire vol. 4 (1924), pp. 294–302"
+   },
+   {
+    "term": "Cwichelm",
+    "text": "A 7th-century West Saxon king. Bede says he sent an assassin to King Edwin of Northumbria around 626. The Knob carries his name, but no grave of his has been found there.",
+    "source": "Bede, Ecclesiastical History, book 2 ch. 9; Historic England list entry 1006312"
+   },
+   {
+    "term": "Hennarið, Hendred",
+    "text": "The village’s name in a charter of 956; Domesday-era spellings include Henret. It is usually read as Old English for ‘wild-bird stream’, after the brook, but that meaning isn’t certain.",
+    "source": "Victoria County History, Berkshire vol. 4 (1924), pp. 294–302"
+   },
+   {
+    "term": "Champs Chapel",
+    "text": "The Chapel of Jesus of Bethlehem, built by the monks of Sheen. It took the name of the Champ family, who held it in the early 18th century and used it as a pigeon-house, bakehouse and wash-house. It is now the village museum.",
+    "source": "Victoria County History, Berkshire vol. 4 (1924), pp. 294–302; Historic England list entry 1048167"
+   },
+   {
+    "term": "Eyston",
+    "text": "The family at Hendred House since the mid-15th century, when John Eyston married Isabel Stowe, heiress of Arches manor. They stayed Catholic through the Reformation.",
+    "source": "Victoria County History, Berkshire vol. 4 (1924), pp. 294–302"
+   },
+   {
+    "term": "King’s Manor",
+    "text": "A manor that belonged to the Crown, was given by Henry V to the Carthusian monks of Sheen in 1415, and at the Dissolution was ‘once more vested in the Crown’.",
+    "source": "Victoria County History, Berkshire vol. 4 (1924), pp. 294–302"
+   },
+   {
+    "term": "Ludbridge",
+    "text": "The small bridge just below the mill, where the old Portway crosses the brook. In 1403 the mill there was called Litelbrygge Mill.",
+    "source": "Victoria County History, Berkshire vol. 4 (1924), pp. 294–302"
+   },
+   {
+    "term": "The Golden Mile",
+    "text": "A green lane where, by village tradition, the medieval cloth fairs were held. This is folklore: nobody has proved it, and where the lane ran isn’t certain.",
+    "source": "Victoria County History, Berkshire vol. 4 (1924), pp. 294–302",
+    "folklore": true
+   },
+   {
+    "term": "Paternoster Bank",
+    "text": "A road named after a medieval piece of land. It could still be identified in the early 1700s, but where it was is now unknown.",
+    "source": "Victoria County History, Berkshire vol. 4 (1924), pp. 294–302"
+   },
+   {
+    "term": "The Ridgeway",
+    "text": "The ancient track along the top of the downs on the parish’s southern edge, now a National Trail. Here it is also the county boundary.",
+    "source": "National Trails, ‘The Ridgeway’"
+   },
+   {
+    "term": "The Icknield Way",
+    "text": "The Ridgeway’s lower twin, crossing the chalk shelf south of the village at about 120 metres, just above the spring line.",
+    "source": "Ordnance Survey mapping (heights)"
+   },
+   {
+    "term": "Ginge Brook",
+    "text": "The stream that rises at West Ginge. East Hendred Brook joins it on the way north, and it reaches the Thames near Sutton Courtenay. Sources differ on where one name ends and the other begins.",
+    "source": "Environment Agency Catchment Data Explorer (Ginge Brook and Mill Brook); Steventon History, ‘The Ginge Brook’"
+   },
+   {
+    "term": "Vale of White Horse",
+    "text": "The clay vale north of the downs, named after the prehistoric White Horse cut into the chalk at Uffington, further west. It is also the name of the district council.",
+    "source": "Source to be added."
+   },
+   {
+    "term": "Cat Street",
+    "text": "A street in the old village. William Penney lived at Orchard House here. Where the name comes from isn’t recorded in the sources used for this app.",
+    "source": "Oxfordshire Blue Plaques Board, ‘William Penney’"
+   }
+  ]
+ }
 }
