@@ -1,7 +1,7 @@
 // Offline support: the app itself is cached on first visit; map tiles are cached
 // as you look at them (up to a limit), so the village maps keep working on a walk
 // with poor signal.
-const VERSION = "eh-v4";
+const VERSION = "eh-v5";
 const SHELL = [
   "./",
   "index.html",
@@ -44,7 +44,7 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-const isTile = (url) => /tile\.openstreetmap\.org|api\.maptiler\.com\/tiles|environment\.data\.gov\.uk\/spatialdata|ogc\.bgs\.ac\.uk/.test(url.href);
+const isTile = (url) => /tile\.openstreetmap\.org|api\.maptiler\.com\/tiles|environment\.data\.gov\.uk\/(spatialdata|geoservices)|ogc\.bgs\.ac\.uk/.test(url.href);
 const isFont = (url) => /fonts\.(googleapis|gstatic)\.com/.test(url.host);
 
 async function trim(cacheName, limit) {

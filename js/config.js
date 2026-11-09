@@ -38,8 +38,11 @@ export const MAP_LAYERS = [
   { id: "habitats", name: "Habitats", full: "Habitats: Natural England’s Living England map", swatch: "#38a800",
     title: "Habitats (Living England)", credit: "© Natural England · Open Government Licence", kind: "overlay",
     url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19, zoom: 14,
-    wms: { url: "https://environment.data.gov.uk/spatialdata/living-england-habitat-map-phase4/wms",
-      layers: "Living_England_Habitat_Map_Phase_4", opacity: 0.6 },
+    // The "geoservices" endpoint answers reliably; the older /spatialdata/ one was timing out
+    // or returning 502/503 errors (Nov 2026), which left half the map empty.
+    wms: { url: "https://environment.data.gov.uk/geoservices/datasets/4aa716ce-f6af-454c-8ba2-833ebc1bde96/wms",
+      // Bigger images mean a quarter as many requests: this server turns away bursts with 503s.
+      layers: "Living_England_Habitat_Map_Phase_4", opacity: 0.6, tileSize: 512 },
     attribution: 'Habitats: Living England &copy; Natural England, <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" target="_blank" rel="noopener">OGL</a> · Map &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
     key: [["Arable and horticultural", "#ffd37f"], ["Grassland (chalk, acid, neutral)", "#ffbee8"], ["Improved grassland", "#cdf57a"],
       ["Broadleaved and mixed woodland", "#38a800"], ["Coniferous woodland", "#00a884"], ["Scrub", "#897044"],

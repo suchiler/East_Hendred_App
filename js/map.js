@@ -341,13 +341,20 @@ export function mapView(root, { sel } = {}) {
     renderSel();
   }
 
+  // Centre a real-map position in the part of the screen not covered by the header or sheet.
+  function centreLeaflet(lat, lng, zoom) {
+    if (!lmap) return;
+    lmap.setView([lat, lng], zoom ?? lmap.getZoom(), { animate: false });
+    const v = visible();
+    lmap.panBy([0, v.H / 2 - (v.t + v.b) / 2], { animate: false });
+  }
+
   function ensureLeaflet() {
     if (lmap || !window.L) return;
     // No floating attribution box: the credit is shown as text under the layer pill.
     lmap = L.map(leafletEl, { zoomControl: false, attributionControl: false }).setView(VILLAGE_CENTRE, 16);
     L.control.zoom({ position: "topright" }).addTo(lmap);
     const it = state.items.find((x) => x.key === state.sel);
-    if (it) lmap.setView([it.lat, it.lng], 16);
     addLeafletMarkers();
   }
 
@@ -366,12 +373,43 @@ export function mapView(root, { sel } = {}) {
         if (overlay) { lmap.removeLayer(overlay); overlay = null; }
         tiles = L.tileLayer(l.url, { maxZoom: l.maxZoom || 18, attribution: l.wms ? "" : l.attribution }).addTo(lmap);
         if (l.wms) {
+          const big = l.wms.tileSize === 512;
           overlay = L.tileLayer.wms(l.wms.url, { layers: l.wms.layers, format: "image/png", transparent: true,
-            opacity: l.wms.opacity ?? 0.6, maxZoom: l.maxZoom || 18 }).addTo(lmap);
+            opacity: l.wms.opacity ?? 0.6, maxZoom: l.maxZoom || 18,
+            ...(big ? { tileSize: 512, zoomOffset: -1 } : {}) });
+          // Government map servers can be busy and turn requests away (503). Retry each failed
+          // image up to 5 times with growing pauses, and say "Loading…" until every image has
+          // arrived; if some still fail, say so rather than leaving silent gaps.
+          const attrib = $(".map-attrib");
+          // Status comes from the layer's own images: still arriving, given up on, or all there.
+          const status = () => {
+            const imgs = [...(overlay.getContainer()?.querySelectorAll("img") || [])];
+            const gaveUp = imgs.filter((i) => i.dataset.failed === "1").length;
+            const waiting = imgs.filter((i) => i.dataset.failed !== "1" && !(i.complete && i.naturalWidth)).length;
+            if (waiting) { attrib.dataset.loading = `Loading ${l.name.toLowerCase()}…`; attrib.classList.add("loading"); }
+            else if (gaveUp) { attrib.dataset.loading = `Some ${l.name.toLowerCase()} areas couldn’t load (the map server is busy).`; attrib.classList.add("loading"); }
+            else attrib.classList.remove("loading");
+          };
+          const later = () => setTimeout(status, 0);
+          overlay.on("loading tileloadstart tileload tileunload load", later);
+          overlay.on("tileerror", (ev) => {
+            const img = ev.tile, n = Number(img.dataset.retries || 0);
+            if (n >= 5) { img.dataset.failed = "1"; later(); return; }
+            img.dataset.retries = String(n + 1);
+            setTimeout(() => { if (img.isConnected) img.src = `${img.src.replace(/&retry=\d+/, "")}&retry=${n + 1}`; }, 1000 * 2 ** n + Math.random() * 500);
+            later();
+          });
+          overlay.addTo(lmap);
         }
         // Overlays read best zoomed out a little, so the whole parish's pattern shows.
-        if (l.zoom && lmap.getZoom() > l.zoom) lmap.setZoom(l.zoom);
-        setTimeout(() => lmap.invalidateSize(), 0);
+        // Once the map has measured itself: centre on the selected place (or keep the view),
+        // zoomed out a little for overlays so the whole parish's pattern shows.
+        setTimeout(() => {
+          lmap.invalidateSize();
+          const z = l.zoom ? Math.min(lmap.getZoom(), l.zoom) : lmap.getZoom();
+          const sel = state.items.find((x) => x.key === state.sel);
+          if (sel) centreLeaflet(sel.lat, sel.lng, z); else lmap.setZoom(z);
+        }, 0);
       }
     }
     $(".layer-name").textContent = l.name;
@@ -393,7 +431,7 @@ export function mapView(root, { sel } = {}) {
     state.sel = key;
     toggleMenu(false);
     const it = state.items.find((x) => x.key === key);
-    if (it && lmap && !leafletEl.hidden) lmap.panTo([it.lat, it.lng]);
+    if (it && lmap && !leafletEl.hidden) setTimeout(() => centreLeaflet(it.lat, it.lng), 0);
     if (it && !stage.hidden) {
       const v = visible();
       if (it.inside && (it.sx === undefined || it.sx < v.l + 30 || it.sx > v.r - 30 || it.sy < v.t + 30 || it.sy > v.b - 10)) centreOn(it.lat, it.lng);
