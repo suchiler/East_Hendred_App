@@ -111,6 +111,13 @@ button { font: inherit; color: inherit; }
   margin: 0 -20px; padding: 4px 10px 0;
 }
 .rail::-webkit-scrollbar, .tabs-inline::-webkit-scrollbar { display: none; }
+/* 24px paper fade on the right edge hints there's more to scroll; the end padding
+   lets the last tab scroll clear of the fade. */
+.rail {
+  padding-right: 34px;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
 .rail a, .tabs-inline button {
   flex-shrink: 0; display: flex; align-items: center; gap: 7px; min-height: 48px; padding: 0 10px;
   font-size: 0.8824rem; font-weight: 600; white-space: nowrap; text-decoration: none; color: var(--muted);
