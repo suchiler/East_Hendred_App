@@ -3,12 +3,12 @@
 // Anything marked TODO still needs local knowledge.
 
 export const ERAS = [
-  { id: "atom", name: "Speed & the atom", span: "1900 to today", color: "#2f6f6a", tint: "rgba(47,111,106,0.10)", art: "era-atom" },
-  { id: "mod", name: "Parsons & enclosure", span: "1700–1900", color: "#7a5a32", tint: "rgba(122,90,50,0.10)", art: "era-mod" },
-  { id: "ref", name: "Reformation & recusants", span: "1530–1700", color: "#5b4a78", tint: "rgba(91,74,120,0.10)", art: "era-ref" },
-  { id: "med", name: "Monks & wool", span: "1100–1530", color: "#8c3b2c", tint: "rgba(140,59,44,0.10)", art: "era-med" },
-  { id: "saxon", name: "Saxon & Domesday", span: "900–1100", color: "#8a5a14", tint: "rgba(138,90,20,0.10)", art: "era-saxon" },
-  { id: "pre", name: "Ancient routes", span: "Before 900", color: "#5f6a3e", tint: "rgba(95,106,62,0.10)", art: "era-pre" }
+  { id: "atom", short: "Atom age", name: "Speed & the atom", span: "1900 to today", color: "#2f6f6a", tint: "rgba(47,111,106,0.10)", art: "era-atom" },
+  { id: "mod", short: "Parsons", name: "Parsons & enclosure", span: "1700–1900", color: "#7a5a32", tint: "rgba(122,90,50,0.10)", art: "era-mod" },
+  { id: "ref", short: "Reformation", name: "Reformation & recusants", span: "1530–1700", color: "#5b4a78", tint: "rgba(91,74,120,0.10)", art: "era-ref" },
+  { id: "med", short: "Monks & wool", name: "Monks & wool", span: "1100–1530", color: "#8c3b2c", tint: "rgba(140,59,44,0.10)", art: "era-med" },
+  { id: "saxon", short: "Saxons", name: "Saxon & Domesday", span: "900–1100", color: "#8a5a14", tint: "rgba(138,90,20,0.10)", art: "era-saxon" },
+  { id: "pre", short: "Ancient", name: "Ancient routes", span: "Before 900", color: "#5f6a3e", tint: "rgba(95,106,62,0.10)", art: "era-pre" }
 ];
 
 // Newest first: the timeline starts at the surface and digs down.

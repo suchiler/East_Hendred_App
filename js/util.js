@@ -34,3 +34,12 @@ export function keepInRail(rail, a) {
   if (left < rail.scrollLeft) rail.scrollTo({ left, behavior: "smooth" });
   else if (right > rail.scrollLeft + rail.clientWidth) rail.scrollTo({ left: right - rail.clientWidth, behavior: "smooth" });
 }
+
+// Rails wrap onto extra lines on narrow screens. If one grows taller than about two lines
+// (large text), it stops being sticky so it doesn't cover the page. Returns a cleanup function.
+export function watchRail(rail) {
+  if (!rail || !window.ResizeObserver) return () => {};
+  const ro = new ResizeObserver(() => rail.classList.toggle("tall", rail.offsetHeight > 100));
+  ro.observe(rail);
+  return () => ro.disconnect();
+}

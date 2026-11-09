@@ -40,10 +40,15 @@ function storyItems(stories) {
 }
 
 // The little marker each kind of place uses (shared by pins, the key and the list).
+// Story pins: an open book; legends, folk tales and ghost stories: a crescent moon.
+const BOOK = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5v13"/></svg>';
+const MOON = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M19.5 15.5A8 8 0 0 1 9 4.2a8 8 0 1 0 10.5 11.3Z" fill="currentColor"/><path d="M17 3.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6Z" fill="currentColor"/></svg>';
+export const storyIcon = (folk) => (folk ? MOON : BOOK);
+
 function glyph(it) {
   if (it.kind === "site") return it.n ? String(it.n) : "";
   if (it.kind === "nature") return LEAF;
-  return it.folk ? "‡" : "¶";
+  return storyIcon(it.folk);
 }
 function pinLabel(it) {
   if (it.kind === "site") return `${it.n ? `Walk stop ${it.n}: ` : ""}${it.name}`;
@@ -237,7 +242,7 @@ export function mapView(root, { sel } = {}) {
     if (state.you) {
       const p = project(state.you.lat, state.you.lng);
       if (p.inside) {
-        const [l, t] = [view.dx + p.x * s - 9, view.dy + p.y * s - 9];
+        const [l, t] = [view.dx + p.x * s - 10, view.dy + p.y * s - 10];
         moves.push([l, t]); keys.push("you");
         html.push(`<span class="you-dot" style="left:${l}px;top:${t}px" role="img" aria-label="You are here"></span>`);
       }
@@ -466,9 +471,10 @@ export function mapView(root, { sel } = {}) {
     const pins = [
       ['<span class="pin-sample pin"><span>1</span></span>', "Walk stop (numbered in walk order)"],
       ['<span class="pin-sample pin"><span class="plain"></span></span>', "Other place"],
-      ['<span class="pin-sample spin"><span>¶</span></span>', "Story"],
-      ['<span class="pin-sample spin folk"><span>‡</span></span>', "Folklore or legend"],
-      [`<span class="pin-sample npin"><span>${LEAF}</span></span>`, "Nature"]
+      [`<span class="pin-sample spin"><span>${BOOK}</span></span>`, "Story from village history"],
+      [`<span class="pin-sample spin folk"><span>${MOON}</span></span>`, "Legend, folk tale or ghost story"],
+      [`<span class="pin-sample npin"><span>${LEAF}</span></span>`, "Nature"],
+      ['<span class="pin-sample"><span class="you-dot sample"></span></span>', "You are here (after you tap the location button)"]
     ];
     $(".map-key").innerHTML = `
       <h2 class="key-h">Pins</h2>
@@ -615,7 +621,7 @@ export function mapView(root, { sel } = {}) {
       link = `#/land/${p.section}`;
     } else {
       const s = it.story;
-      head = `<span class="num story${it.folk ? " folk" : ""}" aria-hidden="true">${it.folk ? "‡" : "¶"}</span>`;
+      head = `<span class="num story${it.folk ? " folk" : ""}" aria-hidden="true">${storyIcon(it.folk)}</span>`;
       sub = `${esc(typeName(s.type))}${s.when ? ` · ${esc(s.when)}` : ""}`;
       text = s.summary || String(s.body).split(/\n\s*\n/)[0];
       link = `#/story/${s.id}`;
@@ -740,7 +746,8 @@ export function mapView(root, { sel } = {}) {
       }
       if (lmap) {
         if (you) lmap.removeLayer(you);
-        you = L.circleMarker([latitude, longitude], { radius: 8, color: "#ffffff", weight: 3, fillColor: "#2f4f8a", fillOpacity: 1 }).addTo(lmap);
+        you = L.marker([latitude, longitude], { icon: L.divIcon({ className: "lmark", html: '<span class="you-dot" role="img" aria-label="You are here"></span>', iconSize: [20, 20], iconAnchor: [10, 10] }),
+          interactive: false, keyboard: false, zIndexOffset: 1000 }).addTo(lmap);
         if (!leafletEl.hidden) lmap.setView([latitude, longitude], Math.max(lmap.getZoom(), 16));
       }
     }, () => toast("Couldn’t get your location. Check that location is allowed for this app."), { enableHighAccuracy: true, timeout: 10000 });

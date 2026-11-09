@@ -1,7 +1,7 @@
 // Timeline, Stories, Entry and Walk screens.
 import { ERAS, ENTRIES, SITES, WALK } from "./data.js";
 import { art } from "./art.js";
-import { esc, store, focusHeading, keepInRail } from "./util.js";
+import { esc, store, focusHeading, keepInRail, watchRail } from "./util.js";
 import * as clock from "./clock.js";
 import { STORY_FORM_URL } from "./config.js";
 import { project, MAP_W, MAP_H } from "./painted-map.js";
@@ -29,11 +29,12 @@ export function timelineView(root) {
             <p class="clock-until"></p>
           </div>
           <ul class="bells" aria-label="Today’s tunes"></ul>
+          <p class="bells-note">Filled bells have already played today.</p>
         </div>
       </section>
 
       <nav class="rail" aria-label="Jump to an era">
-        ${ERAS.map((e) => `<a href="#era-${e.id}" data-era="${e.id}" style="--c:${e.color}"><span class="dot"></span>${esc(e.name)}</a>`).join("")}
+        ${ERAS.map((e) => `<a href="#era-${e.id}" data-era="${e.id}" style="--c:${e.color}"><span class="dot"></span>${esc(e.short || e.name)}</a>`).join("")}
       </nav>
 
       <div class="chronology">
@@ -94,8 +95,9 @@ export function timelineView(root) {
     });
   }, { root: scroller, rootMargin: "-20% 0px -70% 0px" });
   root.querySelectorAll(".era").forEach((s) => io.observe(s));
+  const unwatch = watchRail(root.querySelector(".rail"));
 
-  return () => { clearInterval(tick); io.disconnect(); };
+  return () => { clearInterval(tick); io.disconnect(); unwatch(); };
 }
 
 // ---------- Entry ----------
@@ -204,7 +206,10 @@ const typeSlug = (t) => t.toLowerCase().replace(/[^a-z]+/g, "-");
 
 export function storiesView(root) {
   let filter = store.get("eh.storyCat", "All");
-  const openState = store.get("eh.storySections", {});
+  // Every kind of story starts open. Only sections the reader has opened or closed themselves
+  // are remembered (new key, so older automatic saves are ignored).
+  const openState = store.get("eh.storySections2", {});
+  let userToggled = false;
   root.innerHTML = `
     <div class="page">
       <header class="masthead">
@@ -257,9 +262,8 @@ export function storiesView(root) {
       `<a href="#type-${typeSlug(t.id)}" data-type="${esc(t.id)}" style="--c:${TYPE_COLOURS[t.id] || "#2f4f8a"}"><span class="dot"></span>${esc(t.label)} <span class="rail-count">${items.length}</span></a>`).join("");
     rail.hidden = present.length < 2;
 
-    box.innerHTML = present.map(({ t, items }, i) => {
-      // Only the first kind of story starts open (unless the reader has opened or closed it before).
-      const open = t.id in openState ? openState[t.id] : i === 0;
+    box.innerHTML = present.map(({ t, items }) => {
+      const open = t.id in openState ? openState[t.id] : true;
       return `<details class="story-section" id="type-${typeSlug(t.id)}" data-type="${esc(t.id)}" style="--c:${TYPE_COLOURS[t.id] || "#2f4f8a"}" ${open ? "open" : ""}>
         <summary>
           <span class="sec-title"><h2>${esc(t.label)}</h2><span class="count">${items.length}</span></span>
@@ -270,10 +274,15 @@ export function storiesView(root) {
       </details>`;
     }).join("") || `<p class="empty-note">No stories about this yet.${STORY_FORM_URL ? ` <a href="${esc(STORY_FORM_URL)}" target="_blank" rel="noopener">Know one?</a>` : ""}</p>`;
 
-    box.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => {
-      openState[d.dataset.type] = d.open;
-      store.set("eh.storySections", openState);
-    }));
+    box.querySelectorAll("details").forEach((d) => {
+      d.querySelector("summary").addEventListener("click", () => { userToggled = true; });
+      d.addEventListener("toggle", () => {
+        if (!userToggled) return;
+        userToggled = false;
+        openState[d.dataset.type] = d.open;
+        store.set("eh.storySections2", openState);
+      });
+    });
     if (io) io.disconnect();
     io = new IntersectionObserver((entries) => {
       entries.forEach((en) => { if (en.isIntersecting) highlight(en.target.dataset.type); });
@@ -288,7 +297,7 @@ export function storiesView(root) {
     e.preventDefault();
     const sec = box.querySelector(`.story-section[data-type="${CSS.escape(a.dataset.type)}"]`);
     if (!sec) return;
-    if (!sec.open) sec.open = true;
+    if (!sec.open) { userToggled = true; sec.open = true; }
     sec.scrollIntoView({ behavior: smooth(), block: "start" });
     highlight(a.dataset.type);
   });
@@ -300,13 +309,14 @@ export function storiesView(root) {
   });
 
   let alive = true;
+  const unwatch = watchRail(rail);
   loadStories().then((list) => {
     if (!alive) return;
     stories = list;
     if (!list.length) { box.innerHTML = `<p class="empty-note">Couldn’t load the stories. Check your connection and try again.</p>`; return; }
     paint();
   });
-  return () => { alive = false; if (io) io.disconnect(); };
+  return () => { alive = false; unwatch(); if (io) io.disconnect(); };
 }
 
 // ---------- One story ----------
@@ -380,12 +390,18 @@ export function walkView(root) {
       <section class="progress" aria-label="Your progress">
         <div class="progress-top"><span class="progress-label"></span><span class="muted small">Saved on this phone</span></div>
         <div class="bar" role="progressbar" aria-label="Walk progress" aria-valuemin="0" aria-valuemax="${total}" style="grid-template-columns:repeat(${total}, minmax(0, 1fr))"></div>
-        <div class="strip" style="aspect-ratio:${strip.W} / ${strip.h}; max-width:${Math.round(200 * strip.W / strip.h)}px">
+        <a class="strip" href="#/map" aria-label="Open the walk on the full map" style="aspect-ratio:${strip.W} / ${strip.h}; max-width:${Math.round(200 * strip.W / strip.h)}px">
           <svg viewBox="${strip.vb}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
             <image href="art/painted-map@2x.webp" width="${MAP_W}" height="${MAP_H}"/>
             <path d="M${strip.pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" L")}" fill="none" stroke="#2f4f8a" stroke-width="${(2.4 / strip.k).toFixed(2)}" stroke-dasharray="${(5 / strip.k).toFixed(1)} ${(4 / strip.k).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <div class="strip-dots"></div>
+          <span class="strip-you" hidden></span>
+          <span class="strip-hint" aria-hidden="true">Tap for the full map</span>
+        </a>
+        <div class="strip-tools">
+          <button type="button" class="btn-outline small" data-act="where">Show where I am</button>
+          <span class="muted small where-msg" role="status"></span>
         </div>
       </section>
       <section class="route" aria-labelledby="route-h">
@@ -430,6 +446,11 @@ export function walkView(root) {
         <p><b>Getting there.</b> ${cur.getThere && !cur.getThere.includes("[") ? esc(cur.getThere) : `<span class="muted">Directions coming soon.</span>`}</p>
         <p><b>Look for</b> ${esc(cur.look)}</p>
         <div class="actions">
+          <a class="btn-outline small directions" href="https://www.google.com/maps/dir/?api=1&amp;destination=${cur.site.lat},${cur.site.lng}&amp;travelmode=walking" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 21 3l-8 18-2-8Z"/></svg>
+            Directions<span class="sr-only"> to ${esc(cur.site.name)} (opens Google Maps)</span></a>
+        </div>
+        <div class="actions">
           <button type="button" class="btn big" data-act="here">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
             I’m here</button>
@@ -470,6 +491,24 @@ export function walkView(root) {
     } else if (act === "restart") {
       step = 0; toast = null; open = null; save(); paint();
       root.querySelector('[data-act="here"]')?.focus();
+    } else if (act === "where") {
+      // Only asks for location when the walker taps this button.
+      const msg = root.querySelector(".where-msg");
+      if (!navigator.geolocation) { msg.textContent = "Location isn’t available on this device."; return; }
+      msg.textContent = "Finding you…";
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const at = strip.place(pos.coords.latitude, pos.coords.longitude);
+        const dot = root.querySelector(".strip-you");
+        if (!dot) return;
+        if (at) {
+          dot.hidden = false; dot.style.left = `${at.x}%`; dot.style.top = `${at.y}%`;
+          msg.textContent = "The blue dot on the map is you.";
+        } else {
+          dot.hidden = true;
+          msg.textContent = "You’re outside the area of this map.";
+        }
+      }, () => { msg.textContent = "Couldn’t get your location. Check that location is allowed for this app."; },
+      { enableHighAccuracy: true, timeout: 10000 });
     } else if (act === "make") {
       step = Number(b.dataset.i); open = null; toast = null; save(); paint();
     } else if (b.classList.contains("route-row")) {
@@ -495,5 +534,11 @@ function stripMap(stops) {
   else { const nh = bw / target; miny -= (nh - bh) / 2; bh = nh; }
   const k = W / bw;
   const vb = `${minx.toFixed(1)} ${miny.toFixed(1)} ${bw.toFixed(1)} ${bh.toFixed(1)}`;
-  return { W, h, k, vb, pts, screen: pts.map((p) => ({ x: (((p.x - minx) / bw) * 100).toFixed(2), y: (((p.y - miny) / bh) * 100).toFixed(2) })) };
+  const pct = (p) => ({ x: (((p.x - minx) / bw) * 100).toFixed(2), y: (((p.y - miny) / bh) * 100).toFixed(2) });
+  // Position of a lat/lng on the strip in %, or null if it's off the strip.
+  const place = (lat, lng) => {
+    const p = project(lat, lng), q = pct(p);
+    return q.x >= 0 && q.x <= 100 && q.y >= 0 && q.y <= 100 ? q : null;
+  };
+  return { W, h, k, vb, pts, place, screen: pts.map(pct) };
 }

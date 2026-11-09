@@ -4,7 +4,7 @@
 import { art } from "./art.js";
 import { ART_IMAGES } from "./config.js";
 import * as LA from "./land-art.js";
-import { esc, store, focusHeading, keepInRail } from "./util.js";
+import { esc, store, focusHeading, keepInRail, watchRail } from "./util.js";
 
 let cache = null;
 export function loadLand() {
@@ -78,6 +78,8 @@ const SECTION_COLOURS = {
   living: "#2f6f6a",   // verdigris
   change: "#5b4a78"    // oak-gall violet
 };
+// Short names for the section rail, so it fits on two lines on a phone.
+const RAIL_NAMES = { shape: "Shape", ridgeway: "Ridgeway", soils: "Soils", living: "Wildlife", change: "Changes" };
 
 function sectionHtml(s, data, open) {
   const living = s.id === "living";
@@ -106,7 +108,7 @@ function sectionHtml(s, data, open) {
 
 export function landView(root, arg) {
   root.innerHTML = `<div class="page"><header class="masthead"><h1>The <em>land</em></h1></header><p class="empty-note">Loading…</p></div>`;
-  let alive = true, io = null;
+  let alive = true, io = null, unwatch = () => {};
   loadLand().then((data) => {
     if (!alive) return;
     if (!data) {
@@ -145,7 +147,7 @@ export function landView(root, arg) {
         </section>
         <div class="page">
           <nav class="rail land-rail" aria-label="Jump to a section">
-            ${data.sections.map((s) => `<a href="#land-${esc(s.id)}" data-id="${esc(s.id)}" style="--c:${SECTION_COLOURS[s.id] || "#5f6a3e"}"><span class="dot"></span>${esc(s.title)}</a>`).join("")}
+            ${data.sections.map((s) => `<a href="#land-${esc(s.id)}" data-id="${esc(s.id)}" style="--c:${SECTION_COLOURS[s.id] || "#5f6a3e"}"><span class="dot"></span>${esc(RAIL_NAMES[s.id] || s.title)}</a>`).join("")}
           </nav>
           <div class="land-sections">${data.sections.map((s) => sectionHtml(s, data, !!openState[s.id])).join("")}</div>
           <section class="afield" aria-labelledby="afield-h">
@@ -163,6 +165,7 @@ export function landView(root, arg) {
     // Section rail: jumps to (and opens) a section, and highlights the one you're reading.
     const rail = root.querySelector(".land-rail");
     const links = [...rail.querySelectorAll("a")];
+    unwatch = watchRail(rail);
     const highlight = (id) => links.forEach((a) => {
       const on = a.dataset.id === id;
       a.classList.toggle("on", on);
@@ -189,5 +192,5 @@ export function landView(root, arg) {
     // The loading screen's heading had focus; it's been replaced, so focus the new one.
     focusHeading(root);
   });
-  return () => { alive = false; if (io) io.disconnect(); };
+  return () => { alive = false; unwatch(); if (io) io.disconnect(); };
 }
