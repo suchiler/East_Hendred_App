@@ -212,13 +212,12 @@ export function mapView(root, { sel } = {}) {
       it.inside = p.inside;
       if (!p.inside) { offMap.push({ ...it, p }); it.sx = undefined; continue; }
       let x = view.dx + p.x * s, y = view.dy + p.y * s;
-      if (it.kind !== "site") {
-        // Nudge nature and story pins off pins already placed, so each stays tappable.
-        const ox = x, oy = y;
-        for (let k = 0; k < 12 && placed.some((q) => Math.hypot(q.x - x, q.y - y) < 30); k++) {
-          const a = (k * 60 + 30) * Math.PI / 180, r = 32 + 12 * Math.floor(k / 6);
-          x = ox + r * Math.cos(a); y = oy - r * Math.sin(a);
-        }
+      // Nudge pins off pins already placed so their 44px touch targets don't overlap
+      // (walk stops are placed first, so they move least). Zooming in separates them anyway.
+      const ox = x, oy = y;
+      for (let k = 0; k < 18 && placed.some((q) => Math.hypot(q.x - x, q.y - y) < 44); k++) {
+        const a = (k * 45 + 22.5) * Math.PI / 180, r = 44 + 14 * Math.floor(k / 8);
+        x = ox + r * Math.cos(a); y = oy - r * Math.sin(a);
       }
       placed.push({ x, y });
       it.sx = x; it.sy = y;
@@ -248,6 +247,14 @@ export function mapView(root, { sel } = {}) {
       if (focusedKey) pinsEl.querySelector(`[data-key="${CSS.escape(focusedKey)}"]`)?.focus({ preventScroll: true });
     } else {
       moves.forEach(([l, t], i) => { const el = pinsEl.children[i]; el.style.left = `${l}px`; el.style.top = `${t}px`; });
+    }
+    // Pins under the header or the controls can't be tapped there: fade them out and let taps
+    // pass through. They stay in the tab order, and focusing one scrolls it into view.
+    const v = visible();
+    for (const el of pinsEl.querySelectorAll("[data-key]")) {
+      const it = state.items.find((x) => x.key === el.dataset.key);
+      const under = it && (it.sy < v.t + 4 || it.sy > v.b + 6);
+      el.classList.toggle("offstage", !!under && el !== document.activeElement);
     }
     placeTag(placed);
     placeEdges();

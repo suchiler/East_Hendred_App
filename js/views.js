@@ -181,8 +181,12 @@ function storyItem(s) {
   const first = paragraphs(s.body)[0] || "";
   const by = byline(s);
   const href = `#/story/${esc(s.id)}`;
+  // Short stories are shown in full; long ones show a three-line preview and a link.
+  // The title always links to the story's own page, where the sources are.
+  const links = [long ? `<a class="link" href="${href}">Read the full story<span class="sr-only">: ${esc(s.title)}</span></a>` : "",
+    s.coordinates ? `<a class="link" href="#/map/${esc(s.id)}">Show on map<span class="sr-only">: ${esc(s.title)}</span></a>` : ""].filter(Boolean);
   return `<li><article class="story">
-    <div class="story-head">
+    <div class="story-head${s.artwork ? "" : " no-art"}">
       <div>
         <h3><a class="story-title" href="${href}">${esc(s.title)}</a></h3>
         ${by ? `<p class="who">${esc(by)}</p>` : ""}
@@ -190,8 +194,8 @@ function storyItem(s) {
       </div>
       ${s.artwork ? art(s.artwork, { width: 84, height: 84 }) : ""}
     </div>
-    <div class="story-text">${long ? `<p>${esc(first)}</p>` : paras(s.body)}</div>
-    <p class="story-links"><a class="link" href="${href}">Read the full story</a>${s.coordinates ? `<a class="link" href="#/map/${esc(s.id)}">Show on map</a>` : ""}</p>
+    <div class="story-text">${long ? `<p class="preview-clamp">${esc(first)}</p>` : paras(s.body)}</div>
+    ${links.length ? `<p class="story-links">${links.join("")}</p>` : ""}
   </article></li>`;
 }
 
@@ -257,8 +261,9 @@ export function storiesView(root) {
       `<a href="#type-${typeSlug(t.id)}" data-type="${esc(t.id)}" style="--c:${TYPE_COLOURS[t.id] || "#2f4f8a"}"><span class="dot"></span>${esc(t.label)} <span class="rail-count">${items.length}</span></a>`).join("");
     rail.hidden = present.length < 2;
 
-    box.innerHTML = present.map(({ t, items }) => {
-      const open = openState[t.id] !== false;
+    box.innerHTML = present.map(({ t, items }, i) => {
+      // Only the first kind of story starts open (unless the reader has opened or closed it before).
+      const open = t.id in openState ? openState[t.id] : i === 0;
       return `<details class="story-section" id="type-${typeSlug(t.id)}" data-type="${esc(t.id)}" style="--c:${TYPE_COLOURS[t.id] || "#2f4f8a"}" ${open ? "open" : ""}>
         <summary>
           <span class="sec-title"><h2>${esc(t.label)}</h2><span class="count">${items.length}</span></span>
@@ -379,7 +384,7 @@ export function walkView(root) {
       <section class="progress" aria-label="Your progress">
         <div class="progress-top"><span class="progress-label"></span><span class="muted small">Saved on this phone</span></div>
         <div class="bar" role="progressbar" aria-label="Walk progress" aria-valuemin="0" aria-valuemax="${total}" style="grid-template-columns:repeat(${total}, minmax(0, 1fr))"></div>
-        <div class="strip" style="aspect-ratio:${strip.W} / ${strip.h}">
+        <div class="strip" style="aspect-ratio:${strip.W} / ${strip.h}; max-width:${Math.round(200 * strip.W / strip.h)}px">
           <svg viewBox="${strip.vb}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
             <image href="art/painted-map@2x.webp" width="${MAP_W}" height="${MAP_H}"/>
             <path d="M${strip.pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" L")}" fill="none" stroke="#2f4f8a" stroke-width="${(2.4 / strip.k).toFixed(2)}" stroke-dasharray="${(5 / strip.k).toFixed(1)} ${(4 / strip.k).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>

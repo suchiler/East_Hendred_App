@@ -4,7 +4,7 @@
 import { art } from "./art.js";
 import { ART_IMAGES } from "./config.js";
 import * as LA from "./land-art.js";
-import { esc, store, focusHeading } from "./util.js";
+import { esc, store, focusHeading, keepInRail } from "./util.js";
 
 let cache = null;
 export function loadLand() {
@@ -106,7 +106,7 @@ function sectionHtml(s, data, open) {
 
 export function landView(root, arg) {
   root.innerHTML = `<div class="page"><header class="masthead"><h1>The <em>land</em></h1></header><p class="empty-note">Loading…</p></div>`;
-  let alive = true;
+  let alive = true, io = null;
   loadLand().then((data) => {
     if (!alive) return;
     if (!data) {
@@ -144,6 +144,9 @@ export function landView(root, arg) {
           <div class="deep-src">${sourcesBlock(data.deepTimeSources)}</div>
         </section>
         <div class="page">
+          <nav class="rail land-rail" aria-label="Jump to a section">
+            ${data.sections.map((s) => `<a href="#land-${esc(s.id)}" data-id="${esc(s.id)}" style="--c:${SECTION_COLOURS[s.id] || "#5f6a3e"}"><span class="dot"></span>${esc(s.title)}</a>`).join("")}
+          </nav>
           <div class="land-sections">${data.sections.map((s) => sectionHtml(s, data, !!openState[s.id])).join("")}</div>
           <section class="afield" aria-labelledby="afield-h">
             <h2 id="afield-h">Further afield</h2>
@@ -156,6 +159,29 @@ export function landView(root, arg) {
       openState[d.dataset.id] = d.open;
       store.set("eh.landSections", openState);
     }));
+
+    // Section rail: jumps to (and opens) a section, and highlights the one you're reading.
+    const rail = root.querySelector(".land-rail");
+    const links = [...rail.querySelectorAll("a")];
+    const highlight = (id) => links.forEach((a) => {
+      const on = a.dataset.id === id;
+      a.classList.toggle("on", on);
+      if (on) { a.setAttribute("aria-current", "true"); keepInRail(rail, a); } else a.removeAttribute("aria-current");
+    });
+    rail.addEventListener("click", (e) => {
+      const a = e.target.closest("a[data-id]");
+      if (!a) return;
+      e.preventDefault();
+      const sec = root.querySelector(`#land-${CSS.escape(a.dataset.id)}`);
+      if (!sec) return;
+      sec.open = true;
+      sec.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      highlight(a.dataset.id);
+    });
+    io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) highlight(en.target.dataset.id); });
+    }, { root: root.closest(".view"), rootMargin: "-20% 0px -70% 0px" });
+    root.querySelectorAll(".land-section").forEach((d) => io.observe(d));
     if (arg) {
       const el = root.querySelector(`#land-${CSS.escape(arg)}`);
       if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
@@ -163,5 +189,5 @@ export function landView(root, arg) {
     // The loading screen's heading had focus; it's been replaced, so focus the new one.
     focusHeading(root);
   });
-  return () => { alive = false; };
+  return () => { alive = false; if (io) io.disconnect(); };
 }
