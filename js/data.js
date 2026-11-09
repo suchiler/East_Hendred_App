@@ -108,7 +108,7 @@ export const SITES = [
     spot: "A blue plaque marks the home of William Penney, Baron Penney of East Hendred." },
   { id: "mill", n: null, name: "Mill by Ludbridge", short: "Ludbridge Mill", lat: 51.6025, lng: -1.3444, entry: "domesday",
     spot: "The mill on the brook stands where a Domesday mill probably stood." },
-  { id: "knob", n: null, name: "Scutchamer Knob & the Ridgeway", short: "Scutchamer Knob", lat: 51.5624, lng: -1.3428, entry: "cwichelm",
+  { id: "knob", n: null, name: "Scutchamer Knob & the Ridgeway", short: "Scutchamer Knob", tiny: "Knob", lat: 51.5624, lng: -1.3428, entry: "cwichelm",
     spot: "South of the village, up on the downs. The mound sits in woodland just off the Ridgeway National Trail." }
 ];
 

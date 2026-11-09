@@ -12,11 +12,11 @@ const nls = (tileset) => MAPTILER_KEY
   : "";
 
 export const MAP_LAYERS = [
-  { id: "painted", name: "Painted", full: "Painted map", swatch: "#adc189",
-    title: "Painted map", credit: "Traced from OpenStreetMap, painted for this app", kind: "painted",
+  { id: "painted", name: "Painted", full: "Painted", swatch: "#adc189",
+    title: "Painted", credit: "Traced from OpenStreetMap, painted for this app", kind: "painted",
     attribution: 'Painted for this app from map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' },
-  { id: "today", name: "Today", full: "Today", swatch: "#f7d774",
-    title: "Today’s map", credit: "© OpenStreetMap contributors", kind: "tiles",
+  { id: "today", name: "Today", full: "Today", swatch: "#d9c98f",
+    title: "Today", credit: "OpenStreetMap", kind: "tiles",
     url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19,
     attribution: 'Map &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' },
   { id: "1920s", name: "1920s", full: "1920s: OS One-inch, Popular Edition", swatch: "#e08a4a",
@@ -35,8 +35,8 @@ export const MAP_LAYERS = [
     missing: "Needs a scan lined up with today’s map" },
   // Overlays: a semi-transparent WMS layer drawn over today's OpenStreetMap.
   // Living England (Natural England) covers every field, so habitats show clearly.
-  { id: "habitats", name: "Habitats", full: "Habitats: Natural England’s Living England map", swatch: "#38a800",
-    title: "Habitats (Living England)", credit: "© Natural England · Open Government Licence", kind: "overlay",
+  { id: "habitats", name: "Habitats", full: "Habitats", swatch: "#8fae6c",
+    title: "Habitats", credit: "Natural England · Living England", kind: "overlay",
     url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19, zoom: 14,
     // The "geoservices" endpoint answers reliably; the older /spatialdata/ one was timing out
     // or returning 502/503 errors (Nov 2026), which left half the map empty.
@@ -48,8 +48,8 @@ export const MAP_LAYERS = [
       ["Broadleaved and mixed woodland", "#38a800"], ["Coniferous woodland", "#00a884"], ["Scrub", "#897044"],
       ["Built-up areas and gardens", "#343434"], ["Water", "#bee8ff"]] },
   // British Geological Survey 1:625,000 bedrock (Open Government Licence). Broad bands only at village scale.
-  { id: "geology", name: "Geology", full: "Rocks: BGS bedrock geology, 1:625,000", swatch: "#cdfd35",
-    title: "Bedrock geology (BGS 1:625,000)", credit: "British Geological Survey · Open Government Licence", kind: "overlay",
+  { id: "geology", name: "Geology", full: "Geology", swatch: "#c9c27a",
+    title: "Geology", credit: "British Geological Survey, 1:625,000", kind: "overlay",
     url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", maxZoom: 19, zoom: 13,
     wms: { url: "https://ogc.bgs.ac.uk/cgi-bin/BGS_Bedrock_and_Superficial_Geology/ows", layers: "GBR_BGS_625k_BLS", opacity: 0.55 },
     // Units under the parish, checked with the BGS server's feature info (Nov 2026).

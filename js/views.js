@@ -1,7 +1,7 @@
 // Timeline, Stories, Entry and Walk screens.
 import { ERAS, ENTRIES, SITES, WALK } from "./data.js";
 import { art } from "./art.js";
-import { esc, withGaps, store, focusHeading, keepInRail } from "./util.js";
+import { esc, store, focusHeading, keepInRail } from "./util.js";
 import * as clock from "./clock.js";
 import { STORY_FORM_URL } from "./config.js";
 import { project, MAP_W, MAP_H } from "./painted-map.js";
@@ -366,15 +366,19 @@ export function walkView(root) {
   let open = null, toast = null;
   const strip = stripMap(stops);
 
+  // Facts still waiting for local knowledge (values with "[...]") aren't shown yet.
+  const facts = WALK.facts.filter(([, v]) => !String(v).includes("["));
   root.innerHTML = `
     <div class="page">
       <header class="masthead">
         <h1>The village walk</h1>
-        <dl class="facts">${WALK.facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${withGaps(v)}</dd></div>`).join("")}</dl>
+        ${facts.length ? `<dl class="facts">${facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>` : ""}
       </header>
+      <div class="walk-toast" role="status"></div>
+      <section class="current" aria-label="Current stop"></section>
       <section class="progress" aria-label="Your progress">
         <div class="progress-top"><span class="progress-label"></span><span class="muted small">Saved on this phone</span></div>
-        <div class="bar" role="progressbar" aria-label="Walk progress" aria-valuemin="0" aria-valuemax="${total}"></div>
+        <div class="bar" role="progressbar" aria-label="Walk progress" aria-valuemin="0" aria-valuemax="${total}" style="grid-template-columns:repeat(${total}, minmax(0, 1fr))"></div>
         <div class="strip" style="aspect-ratio:${strip.W} / ${strip.h}">
           <svg viewBox="${strip.vb}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
             <image href="art/painted-map@2x.webp" width="${MAP_W}" height="${MAP_H}"/>
@@ -383,8 +387,6 @@ export function walkView(root) {
           <div class="strip-dots"></div>
         </div>
       </section>
-      <div class="walk-toast" role="status"></div>
-      <section class="current" aria-live="polite"></section>
       <section class="route" aria-labelledby="route-h">
         <h2 id="route-h">The route</h2>
         <ol class="route-list"></ol>
@@ -404,6 +406,7 @@ export function walkView(root) {
     $(".progress-label").textContent = finished ? `All ${total} stops done` : `Stop ${step + 1} of ${total}`;
     const bar = $(".bar");
     bar.setAttribute("aria-valuenow", String(Math.min(step, total)));
+    bar.setAttribute("aria-valuetext", finished ? `All ${total} stops done` : `Stop ${step + 1} of ${total}`);
     bar.innerHTML = stops.map((s) => `<span class="${s.i < step ? "done" : s.i === step ? "now" : ""}"></span>`).join("");
     $(".strip-dots").innerHTML = stops.map((s) =>
       `<span class="sdot ${s.i < step ? "done" : s.i === step ? "now" : ""}" style="left:${strip.screen[s.i].x}%;top:${strip.screen[s.i].y}%">${s.i + 1}</span>`).join("");
@@ -417,13 +420,13 @@ export function walkView(root) {
     $(".current").style.setProperty("--t", era.tint);
     $(".current").className = `current ${finished ? "done" : ""}`;
     $(".current").innerHTML = finished ? `
-        <h2>Walk complete</h2>
+        <h2 tabindex="-1">Walk complete</h2>
         <p>Seven stops and eight centuries of village history. Still have legs? Head up to Scutchamer Knob on the Ridgeway.</p>
         <button type="button" class="btn-outline" data-act="restart">Start again</button>`
       : `
         <p class="era-line">Stop ${step + 1} of ${total} · ${esc(era.name)}, ${esc(cur.entryObj.date)}</p>
-        <h2>${esc(cur.site.name)}</h2>
-        <p><b>Getting there.</b> ${cur.getThere ? esc(cur.getThere) : withGaps(`[From ${stops[step - 1]?.site.short || "the start"}: directions to add]`)}</p>
+        <h2 tabindex="-1">${esc(cur.site.name)}</h2>
+        <p><b>Getting there.</b> ${cur.getThere && !cur.getThere.includes("[") ? esc(cur.getThere) : `<span class="muted">Directions coming soon.</span>`}</p>
         <p><b>Look for</b> ${esc(cur.look)}</p>
         <div class="actions">
           <button type="button" class="btn big" data-act="here">
@@ -458,11 +461,14 @@ export function walkView(root) {
       const next = stops[step + 1];
       toast = `Stop ${step + 1} done.${next ? ` Next: ${next.site.name}.` : ""}`;
       step += 1; open = null; save(); paint();
-      root.querySelector(".current")?.scrollIntoView({ block: "nearest" });
+      // The toast announces what happened; focus moves to the next stop's name.
+      root.querySelector(".current h2")?.focus();
     } else if (act === "undo") {
       step = Math.max(0, step - 1); toast = null; save(); paint();
+      root.querySelector('[data-act="here"]')?.focus();
     } else if (act === "restart") {
       step = 0; toast = null; open = null; save(); paint();
+      root.querySelector('[data-act="here"]')?.focus();
     } else if (act === "make") {
       step = Number(b.dataset.i); open = null; toast = null; save(); paint();
     } else if (b.classList.contains("route-row")) {

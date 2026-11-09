@@ -1,6 +1,11 @@
-// The map view: the painted village map (from js/painted-map.js), plus real tiled
-// maps (today and historic) through Leaflet. Sites and stories are placed from their
-// lat/lng; anything beyond the drawing gets a marker at the edge pointing to it.
+// The map view: the painted village map (a pre-rendered image), plus real tiled maps
+// (today, habitats, geology) through Leaflet. Places are positioned from their lat/lng;
+// anything beyond the drawing gets a marker at the edge pointing to it.
+//
+// Accessibility: the header and controls come first in tab order, then the pins (walk
+// stops in number order, then other places, nature and stories). "List" offers every
+// place as a plain list. Choosing a place moves focus to its sheet; closing returns
+// focus to the pin. The layer and list sheets are modal dialogs that trap focus.
 import { SITES, ENTRIES, NATURE_SITES } from "./data.js";
 import { MAP_LAYERS, VILLAGE_CENTRE, layerReady } from "./config.js";
 import { MAP_W, MAP_H, project } from "./painted-map.js";
@@ -9,51 +14,57 @@ import { esc } from "./util.js";
 
 const entryOf = (id) => ENTRIES.find((e) => e.id === id);
 const ARROW = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>';
-const MAX_ZOOM = 3.5;
 const CLOSE = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+const LEAF = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15"/><path d="M5 19 13 11"/></svg>';
+const MAX_ZOOM = 3.5;
 // The painted map is shown as a pre-rendered image (see tools/painted-map/render.mjs):
 // big SVG watercolour filters are too heavy for some phones.
 const PAINTED_IMG = `<img class="painted-img" src="art/painted-map@2x.webp" srcset="art/painted-map@2x.webp 2x, art/painted-map@3x.webp 3x" width="${MAP_W}" height="${MAP_H}" alt="" decoding="async" draggable="false">`;
+// Landscape phones: sheets become a side panel (must match the CSS media query).
+const SIDE_PANEL = "(orientation: landscape) and (max-height: 500px)";
+
+const RANK = { site: 0, nature: 1, story: 2 };
+// Pin order for tab order and the list: walk stops by number, other places, nature, stories.
+const order = (a, b) => (RANK[a.kind] - RANK[b.kind]) || ((a.n ?? 99) - (b.n ?? 99));
 
 function siteItems() {
-  return SITES.map((s) => ({ key: `site:${s.id}`, kind: "site", id: s.id, n: s.n, name: s.name, short: s.short, lat: s.lat, lng: s.lng, site: s }));
+  return SITES.map((s) => ({ key: `site:${s.id}`, kind: "site", id: s.id, n: s.n, name: s.name, short: s.short, tiny: s.tiny, lat: s.lat, lng: s.lng, site: s }));
 }
 function natureItems() {
   return NATURE_SITES.map((s) => ({ key: `nature:${s.id}`, kind: "nature", id: s.id, name: s.name, short: s.short, lat: s.lat, lng: s.lng, place: s }));
 }
-const LEAF = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15"/><path d="M5 19 13 11"/></svg>';
-const RANK = { site: 0, nature: 1, story: 2 };
 function storyItems(stories) {
   return stories.filter((s) => Array.isArray(s.coordinates) && s.coordinates.length === 2)
     .map((s) => ({ key: `story:${s.id}`, kind: "story", id: s.id, name: s.title, short: s.title,
       lat: Number(s.coordinates[0]), lng: Number(s.coordinates[1]), folk: isFolklore(s), story: s }));
 }
 
+// The little marker each kind of place uses (shared by pins, the key and the list).
+function glyph(it) {
+  if (it.kind === "site") return it.n ? String(it.n) : "";
+  if (it.kind === "nature") return LEAF;
+  return it.folk ? "‡" : "¶";
+}
+function pinLabel(it) {
+  if (it.kind === "site") return `${it.n ? `Walk stop ${it.n}: ` : ""}${it.name}`;
+  if (it.kind === "nature") return `Nature: ${it.name}`;
+  return `${typeName(it.story.type)}: ${it.name}`;
+}
+
 export function mapView(root, { sel } = {}) {
   const state = {
     sel: null,
+    opener: null,    // the place whose pin opened the sheet, to return focus to
     wanted: sel || null,
     layer: "painted", // always open on the painted map
-    menu: false,
+    dialog: null,     // the open modal sheet, if any
     you: null,        // last known position {lat, lng}
     items: [...siteItems(), ...natureItems()]
   };
+  const ready = MAP_LAYERS.filter(layerReady);
 
   root.innerHTML = `
     <section class="map" aria-labelledby="map-h">
-      <div class="map-canvas">
-        <div class="map-stage" style="width:${MAP_W}px;height:${MAP_H}px">${PAINTED_IMG}</div>
-        <div class="pins"></div>
-        <div class="map-leaflet" hidden></div>
-        <div class="edge-markers"></div>
-        <div class="zoom-ctl">
-          <button type="button" data-act="zoom-in" aria-label="Zoom in">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-          <button type="button" data-act="zoom-out" aria-label="Zoom out">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
-        </div>
-      </div>
-
       <header class="map-head">
         <div>
           <h1 id="map-h">The village</h1>
@@ -66,30 +77,47 @@ export function mapView(root, { sel } = {}) {
       <p class="map-toast" role="status" hidden></p>
 
       <div class="map-pills">
-        <ul class="map-key" aria-label="Map key" hidden></ul>
+        <div class="map-key" id="map-key" hidden></div>
         <div class="pill-row">
           <button type="button" class="pill" data-act="menu" aria-haspopup="dialog" aria-expanded="false">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="m2 12.5 10 5 10-5"/></svg>
             Map: <span class="layer-name"></span>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>
           </button>
-          <button type="button" class="pill key-btn" data-act="key" aria-expanded="false" hidden>Key</button>
+          <button type="button" class="pill" data-act="list" aria-haspopup="dialog" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>
+            List
+          </button>
+          <button type="button" class="pill key-btn" data-act="key" aria-expanded="false" aria-controls="map-key">Key</button>
           <div class="bottom-edges"></div>
         </div>
-        <p class="map-attrib"></p>
+        <p class="map-attrib">
+          <button type="button" class="attrib-toggle" data-act="attrib" aria-expanded="false" aria-label="Show full map credits" hidden>i</button>
+          <span class="attrib-text"></span>
+        </p>
       </div>
 
-      <section class="sheet place" aria-live="polite"></section>
+      <div class="map-canvas" role="region" aria-label="Painted map. Use the arrow keys to move it, and plus and minus to zoom." tabindex="0">
+        <div class="map-stage" style="width:${MAP_W}px;height:${MAP_H}px">${PAINTED_IMG}</div>
+        <div class="map-leaflet" hidden></div>
+        <div class="pins"></div>
+        <div class="edge-markers"></div>
+        <div class="zoom-ctl">
+          <button type="button" data-act="zoom-in" aria-label="Zoom in">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button type="button" data-act="zoom-out" aria-label="Zoom out">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+        </div>
+      </div>
 
-      <section class="sheet layers" role="dialog" aria-modal="false" aria-labelledby="layers-h" hidden>
+      <section class="sheet place" aria-labelledby="place-h" hidden></section>
+
+      <section class="sheet layers" role="dialog" aria-modal="true" aria-labelledby="layers-h" hidden>
         <div class="sheet-head">
           <h2 id="layers-h">Choose a map</h2>
-          <button type="button" class="icon-btn" data-act="close" aria-label="Close">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-          </button>
+          <button type="button" class="icon-btn" data-act="close-dialog" aria-label="Close">${CLOSE}</button>
         </div>
-        <ul class="layer-list">
-          ${MAP_LAYERS.filter(layerReady).map((l) => `<li><button type="button" class="layer-row" data-layer="${l.id}" aria-pressed="false">
+        <ul class="layer-list" role="radiogroup" aria-labelledby="layers-h">
+          ${ready.map((l) => `<li role="none"><button type="button" role="radio" class="layer-row" data-layer="${l.id}" aria-checked="false">
               <span class="swatch" style="background:${l.swatch}"></span>
               <span class="layer-text"><span class="layer-full">${esc(l.full)}</span>
               <span class="layer-sub">${esc(l.credit)}</span></span>
@@ -97,23 +125,33 @@ export function mapView(root, { sel } = {}) {
             </button></li>`).join("")}
         </ul>
       </section>
+
+      <section class="sheet list-sheet" role="dialog" aria-modal="true" aria-labelledby="list-h" hidden>
+        <div class="sheet-head">
+          <h2 id="list-h">Places on the map</h2>
+          <button type="button" class="icon-btn" data-act="close-dialog" aria-label="Close">${CLOSE}</button>
+        </div>
+        <div class="place-list"></div>
+      </section>
     </section>`;
 
   const $ = (q) => root.querySelector(q);
-  const canvas = $(".map-canvas"), stage = $(".map-stage"), leafletEl = $(".map-leaflet");
-  const pinsEl = $(".pins");
+  const mapEl = $(".map"), canvas = $(".map-canvas"), stage = $(".map-stage"), leafletEl = $(".map-leaflet");
+  const pinsEl = $(".pins"), place = $(".place");
   let lmap = null, tiles = null, overlay = null, you = null;
   let markers = {};
   // Painted map view: base cover scale, zoom factor and offset (screen px).
   const view = { base: 1, z: 1, dx: 0, dy: 0, ready: false };
   const S = () => view.base * view.z;
+  const sidePanel = () => matchMedia(SIDE_PANEL).matches;
 
-  // Visible area not hidden by the header or the bottom sheet.
+  // The part of the map not covered by the header, the pills or an open sheet.
   const visible = () => {
     const W = canvas.clientWidth, H = canvas.clientHeight;
     const head = $(".map-head").offsetHeight;
     const pills = $(".map-pills");
-    return { l: 0, r: W, t: head, b: Math.max(head + 80, pills.offsetTop - 8), W, H };
+    const panel = sidePanel() && !place.hidden ? place.offsetWidth : 0;
+    return { l: 0, r: W - panel, t: head, b: Math.max(head + 80, pills.offsetTop - 8), W, H };
   };
 
   function clampView() {
@@ -169,13 +207,13 @@ export function mapView(root, { sel } = {}) {
     const placed = [];
     offMap = [];
     const html = [], moves = [], keys = [];
-    const ordered = [...state.items].sort((a, b) => RANK[a.kind] - RANK[b.kind]);
-    for (const it of ordered) {
+    for (const it of [...state.items].sort(order)) {
       const p = project(it.lat, it.lng);
       it.inside = p.inside;
       if (!p.inside) { offMap.push({ ...it, p }); it.sx = undefined; continue; }
       let x = view.dx + p.x * s, y = view.dy + p.y * s;
       if (it.kind !== "site") {
+        // Nudge nature and story pins off pins already placed, so each stays tappable.
         const ox = x, oy = y;
         for (let k = 0; k < 12 && placed.some((q) => Math.hypot(q.x - x, q.y - y) < 30); k++) {
           const a = (k * 60 + 30) * Math.PI / 180, r = 32 + 12 * Math.floor(k / 6);
@@ -187,16 +225,10 @@ export function mapView(root, { sel } = {}) {
       const on = it.key === state.sel;
       const r = it.kind === "site" ? 22 : 20;
       moves.push([x - r, y - r]); keys.push(it.key);
-      if (it.kind === "site") {
-        html.push(`<button type="button" class="pin${on ? " on" : ""}" data-key="${it.key}" style="left:${x - 22}px;top:${y - 22}px"
-          aria-label="${it.n ? `${it.n}. ` : ""}${esc(it.name)}" aria-pressed="${on}"><span class="${it.n ? "" : "plain"}">${it.n ?? ""}</span></button>`);
-      } else if (it.kind === "nature") {
-        html.push(`<button type="button" class="npin${on ? " on" : ""}" data-key="${it.key}" style="left:${x - 20}px;top:${y - 20}px"
-          aria-label="Nature: ${esc(it.name)}" aria-pressed="${on}"><span>${LEAF}</span></button>`);
-      } else {
-        html.push(`<button type="button" class="spin${it.folk ? " folk" : ""}${on ? " on" : ""}" data-key="${it.key}" style="left:${x - 20}px;top:${y - 20}px"
-          aria-label="${esc(typeName(it.story.type))}: ${esc(it.name)}" aria-pressed="${on}"><span>${it.folk ? "‡" : ""}</span></button>`);
-      }
+      const cls = it.kind === "site" ? "pin" : it.kind === "nature" ? "npin" : `spin${it.folk ? " folk" : ""}`;
+      const inner = it.kind === "site" && !it.n ? `<span class="plain"></span>` : `<span aria-hidden="true">${glyph(it)}</span>`;
+      html.push(`<button type="button" class="${cls}${on ? " on" : ""}" data-key="${it.key}" style="left:${x - r}px;top:${y - r}px"
+        aria-label="${esc(pinLabel(it))}"${on ? ' aria-current="true"' : ""}>${inner}</button>`);
     }
     if (state.you) {
       const p = project(state.you.lat, state.you.lng);
@@ -210,8 +242,10 @@ export function mapView(root, { sel } = {}) {
     // which is much cheaper on phones and keeps keyboard focus on a pin.
     const sig = `${keys.join(",")}|${state.sel}`;
     if (sig !== pinsSig) {
+      const focusedKey = document.activeElement?.closest?.(".pins [data-key]")?.dataset.key;
       pinsEl.innerHTML = html.join("") + '<span class="pin-tag" aria-hidden="true" hidden></span>';
       pinsSig = sig;
+      if (focusedKey) pinsEl.querySelector(`[data-key="${CSS.escape(focusedKey)}"]`)?.focus({ preventScroll: true });
     } else {
       moves.forEach(([l, t], i) => { const el = pinsEl.children[i]; el.style.left = `${l}px`; el.style.top = `${t}px`; });
     }
@@ -251,21 +285,23 @@ export function mapView(root, { sel } = {}) {
   // One marker per distinct off-map spot, at the edge, pointing towards it.
   function placeEdges() {
     const edges = $(".edge-markers"), bottom = $(".bottom-edges");
+    const focusedKey = document.activeElement?.closest?.(".edge")?.dataset.key;
     edges.innerHTML = ""; bottom.innerHTML = "";
     if (stage.hidden) return;
     // Group off-map places within about 600 m of each other into one marker.
     const groups = [];
-    for (const it of [...offMap].sort((a, b) => RANK[a.kind] - RANK[b.kind])) {
+    for (const it of [...offMap].sort(order)) {
       const g = groups.find((x) => distanceKm([x[0].lat, x[0].lng], [it.lat, it.lng]) < 0.6);
       if (g) g.push(it); else groups.push([it]);
     }
     const v = visible();
-    const R = { l: 12, r: v.W - 60, t: v.t + 12, b: v.b - 8 };
+    const R = { l: 12, r: v.r - 60, t: v.t + 12, b: v.b - 8 };
     const cx = (R.l + R.r) / 2, cy = (R.t + R.b) / 2;
     const s = S();
+    const narrow = v.W < 360;
     groups.forEach((g) => {
       const lead = g.find((i) => i.kind === "site") || g[0];
-      const label = lead.short;
+      const label = narrow && lead.tiny ? lead.tiny : lead.short;
       const extra = g.length > 1 ? `, and ${g.length - 1} more ${g.length === 2 ? "place" : "places"} nearby` : "";
       const vx = view.dx + lead.p.x * s - cx, vy = view.dy + lead.p.y * s - cy;
       const angle = Math.atan2(vx, -vy) * 180 / Math.PI;
@@ -276,14 +312,17 @@ export function mapView(root, { sel } = {}) {
       btn.className = `pill edge${lead.key === state.sel ? " on" : ""}`;
       btn.dataset.key = lead.key;
       btn.setAttribute("aria-label", `${lead.name}${extra}, beyond the edge of this map`);
-      btn.innerHTML = `<span class="arrow" style="transform:rotate(${angle}deg)">${ARROW}</span>${esc(label)}`;
-      if (ty <= tx && vy > 0) { bottom.appendChild(btn); return; }
-      edges.appendChild(btn);
-      const t = Math.min(tx, ty), w = btn.offsetWidth, h = btn.offsetHeight;
-      const px = Math.max(R.l + w / 2, Math.min(R.r - w / 2, cx + vx * t));
-      const py = Math.max(R.t + h / 2, Math.min(R.b - h / 2, cy + vy * t));
-      btn.style.left = `${px - w / 2}px`;
-      btn.style.top = `${py - h / 2}px`;
+      btn.innerHTML = `<span class="arrow" aria-hidden="true" style="transform:rotate(${angle}deg)">${ARROW}</span>${esc(label)}`;
+      if (ty <= tx && vy > 0) bottom.appendChild(btn);
+      else {
+        edges.appendChild(btn);
+        const t = Math.min(tx, ty), w = btn.offsetWidth, h = btn.offsetHeight;
+        const px = Math.max(R.l + w / 2, Math.min(R.r - w / 2, cx + vx * t));
+        const py = Math.max(R.t + h / 2, Math.min(R.b - h / 2, cy + vy * t));
+        btn.style.left = `${px - w / 2}px`;
+        btn.style.top = `${py - h / 2}px`;
+      }
+      if (focusedKey === lead.key) btn.focus({ preventScroll: true });
     });
   }
 
@@ -332,7 +371,26 @@ export function mapView(root, { sel } = {}) {
     zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - rect.left, e.clientY - rect.top);
   }, { passive: false });
 
-  const ro = new ResizeObserver(fit);
+  // Keyboard alternative to dragging (WCAG 2.5.7): arrows pan, + and − zoom.
+  canvas.addEventListener("keydown", (e) => {
+    if (stage.hidden || e.target !== canvas) return;
+    const step = 60, v = visible();
+    const moves = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] };
+    if (moves[e.key]) { view.dx += moves[e.key][0]; view.dy += moves[e.key][1]; applyView(); e.preventDefault(); }
+    else if (e.key === "+" || e.key === "=") { zoomAt(1.4, (v.l + v.r) / 2, (v.t + v.b) / 2); e.preventDefault(); }
+    else if (e.key === "-" || e.key === "_") { zoomAt(1 / 1.4, (v.l + v.r) / 2, (v.t + v.b) / 2); e.preventDefault(); }
+  });
+
+  // A pin that gets keyboard focus while hidden under the header or controls scrolls into view.
+  pinsEl.addEventListener("focusin", (e) => {
+    const key = e.target.closest("[data-key]")?.dataset.key;
+    const it = key && state.items.find((x) => x.key === key);
+    if (!it || it.sx === undefined) return;
+    const v = visible();
+    if (it.sx < v.l + 22 || it.sx > v.r - 22 || it.sy < v.t + 22 || it.sy > v.b - 22) { centreOn(it.lat, it.lng); applyView(); }
+  });
+
+  const ro = new ResizeObserver(() => { fit(); fitAttrib(); positionPills(); });
   ro.observe(canvas);
 
   // ---- Real maps (Leaflet) ----
@@ -340,16 +398,38 @@ export function mapView(root, { sel } = {}) {
     if (!lmap) return;
     Object.values(markers).forEach((m) => lmap.removeLayer(m));
     markers = {};
-    for (const it of state.items) {
-      const html = it.kind === "site" ? `<span class="lpin${it.n ? "" : " plain"}">${it.n ?? ""}</span>`
-        : it.kind === "nature" ? `<span class="lnpin">${LEAF}</span>`
-        : `<span class="lspin${it.folk ? " folk" : ""}">${it.folk ? "‡" : ""}</span>`;
+    for (const it of [...state.items].sort(order)) {
+      const cls = it.kind === "site" ? `lpin${it.n ? "" : " plain"}` : it.kind === "nature" ? "lnpin" : `lspin${it.folk ? " folk" : ""}`;
+      const html = `<span class="${cls}" aria-hidden="true">${glyph(it)}</span>`;
       const size = it.kind === "site" ? 32 : 26;
-      const icon = L.divIcon({ className: "", html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
-      markers[it.key] = L.marker([it.lat, it.lng], { icon, title: it.name, keyboard: true, zIndexOffset: it.kind === "site" ? 100 : 0 })
-        .addTo(lmap).on("click", () => select(it.key));
+      const icon = L.divIcon({ className: "lmark", html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
+      const m = L.marker([it.lat, it.lng], { icon, title: pinLabel(it), alt: pinLabel(it), keyboard: true, zIndexOffset: it.kind === "site" ? 100 : 0 })
+        .addTo(lmap).on("click", () => select(it.key, { focus: true }));
+      const el = m.getElement();
+      if (el) { el.setAttribute("role", "button"); el.setAttribute("aria-label", pinLabel(it)); el.dataset.key = it.key; }
+      markers[it.key] = m;
     }
+    nudgeMarkers();
     renderSel();
+  }
+
+  // Overlapping markers on the real maps are nudged apart so each stays visible and tappable.
+  function nudgeMarkers() {
+    if (!lmap) return;
+    const placed = [];
+    for (const it of [...state.items].sort(order)) {
+      const m = markers[it.key];
+      const inner = m?.getElement()?.firstElementChild;
+      if (!inner) continue;
+      const p = lmap.latLngToContainerPoint([it.lat, it.lng]);
+      let x = p.x, y = p.y;
+      for (let k = 0; k < 12 && placed.some((q) => Math.hypot(q.x - x, q.y - y) < 28); k++) {
+        const a = (k * 60 + 30) * Math.PI / 180, r = 30 + 10 * Math.floor(k / 6);
+        x = p.x + r * Math.cos(a); y = p.y - r * Math.sin(a);
+      }
+      placed.push({ x, y });
+      inner.style.transform = x !== p.x || y !== p.y ? `translate(${(x - p.x).toFixed(0)}px, ${(y - p.y).toFixed(0)}px)` : "";
+    }
   }
 
   // Centre a real-map position in the part of the screen not covered by the header or sheet.
@@ -357,7 +437,7 @@ export function mapView(root, { sel } = {}) {
     if (!lmap) return;
     lmap.setView([lat, lng], zoom ?? lmap.getZoom(), { animate: false });
     const v = visible();
-    lmap.panBy([0, v.H / 2 - (v.t + v.b) / 2], { animate: false });
+    lmap.panBy([(v.W - (v.l + v.r)) / 2, v.H / 2 - (v.t + v.b) / 2], { animate: false });
   }
 
   function ensureLeaflet() {
@@ -365,7 +445,31 @@ export function mapView(root, { sel } = {}) {
     // No floating attribution box: the credit is shown as text under the layer pill.
     lmap = L.map(leafletEl, { zoomControl: false, attributionControl: false }).setView(VILLAGE_CENTRE, 16);
     L.control.zoom({ position: "topright" }).addTo(lmap);
+    lmap.on("zoomend", nudgeMarkers);
     addLeafletMarkers();
+  }
+
+  // The Key: pin styles always, plus the colour key for overlay maps.
+  function renderKey(l) {
+    const pins = [
+      ['<span class="pin-sample pin"><span>1</span></span>', "Walk stop (numbered in walk order)"],
+      ['<span class="pin-sample pin"><span class="plain"></span></span>', "Other place"],
+      ['<span class="pin-sample spin"><span>¶</span></span>', "Story"],
+      ['<span class="pin-sample spin folk"><span>‡</span></span>', "Folklore or legend"],
+      [`<span class="pin-sample npin"><span>${LEAF}</span></span>`, "Nature"]
+    ];
+    $(".map-key").innerHTML = `
+      <h2 class="key-h">Pins</h2>
+      <ul>${pins.map(([sample, name]) => `<li>${sample}<span>${name}</span></li>`).join("")}</ul>
+      ${l.key ? `<h2 class="key-h">${esc(l.name)} colours</h2>
+      <ul>${l.key.map(([name, colour]) => `<li><span class="sw" style="background:${colour}"></span><span>${esc(name)}</span></li>`).join("")}</ul>` : ""}`;
+  }
+
+  // The credit is one line; an "i" button expands it when it doesn't fit.
+  function fitAttrib() {
+    const p = $(".map-attrib"), text = $(".attrib-text"), btn = $(".attrib-toggle");
+    if (p.classList.contains("open")) return;
+    btn.hidden = !(text.scrollWidth > text.clientWidth + 1);
   }
 
   function setLayer(id) {
@@ -376,6 +480,12 @@ export function mapView(root, { sel } = {}) {
     stage.hidden = !painted;
     $(".zoom-ctl").hidden = !painted;
     leafletEl.hidden = painted;
+    canvas.tabIndex = painted ? 0 : -1;
+    if (painted) canvas.setAttribute("role", "region"); else canvas.removeAttribute("role");
+    canvas.toggleAttribute("aria-label", painted);
+    if (painted) canvas.setAttribute("aria-label", "Painted map. Use the arrow keys to move it, and plus and minus to zoom.");
+    const attrib = $(".map-attrib");
+    attrib.classList.remove("loading");
     if (!painted) {
       ensureLeaflet();
       if (lmap) {
@@ -391,10 +501,8 @@ export function mapView(root, { sel } = {}) {
           // Government map servers can be busy and turn requests away (503). Retry each failed
           // image up to 5 times with growing pauses, and say "Loading…" until every image has
           // arrived; if some still fail, say so rather than leaving silent gaps.
-          const attrib = $(".map-attrib");
-          // Status comes from the layer's own images: still arriving, given up on, or all there.
           const status = () => {
-            const imgs = [...(overlay.getContainer()?.querySelectorAll("img") || [])];
+            const imgs = [...(overlay?.getContainer()?.querySelectorAll("img") || [])];
             const gaveUp = imgs.filter((i) => i.dataset.failed === "1").length;
             const waiting = imgs.filter((i) => i.dataset.failed !== "1" && !(i.complete && i.naturalWidth)).length;
             if (waiting) { attrib.dataset.loading = `Loading ${l.name.toLowerCase()}…`; attrib.classList.add("loading"); }
@@ -419,62 +527,72 @@ export function mapView(root, { sel } = {}) {
           const z = l.zoom ? Math.min(lmap.getZoom(), l.zoom) : lmap.getZoom();
           const sel = state.items.find((x) => x.key === state.sel);
           if (sel) centreLeaflet(sel.lat, sel.lng, z); else lmap.setZoom(z);
+          nudgeMarkers();
         }, 0);
       }
     }
     $(".layer-name").textContent = l.name;
     $(".map-credit").textContent = l.title;
-    $(".map-attrib").innerHTML = l.attribution || "";
-    const key = $(".map-key"), keyBtn = $(".key-btn");
-    keyBtn.hidden = !l.key;
-    key.innerHTML = (l.key || []).map(([name, colour]) => `<li><span class="sw" style="background:${colour}"></span>${esc(name)}</li>`).join("");
-    if (!l.key) { key.hidden = true; keyBtn.setAttribute("aria-expanded", "false"); }
-    root.querySelectorAll(".layer-row").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.layer === id)));
+    $(".attrib-text").innerHTML = l.attribution || "";
+    attrib.classList.remove("open");
+    $(".attrib-toggle").setAttribute("aria-expanded", "false");
+    renderKey(l);
+    root.querySelectorAll(".layer-row").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.layer === id)));
     if (painted) applyView(); else placePins();
     renderSel();
+    requestAnimationFrame(fitAttrib);
   }
 
   // ---- Selection and the place sheet ----
-  function select(key) {
-    // Tapping the selected place again closes its sheet.
-    if (key && key === state.sel && !state.menu) key = null;
+  function focusPin(key) {
+    const sel = `[data-key="${CSS.escape(key)}"]`;
+    const el = pinsEl.querySelector(sel) || root.querySelector(`.edge${sel}`) || markers[key]?.getElement() || $('[data-act="list"]');
+    el?.focus({ preventScroll: false });
+  }
+
+  function select(key, { focus = false } = {}) {
+    // Choosing the selected place again closes its sheet.
+    if (key && key === state.sel) key = null;
+    const closing = !key && state.sel;
+    const returnTo = state.opener;
     state.sel = key;
-    toggleMenu(false);
+    if (key) state.opener = key;
     const it = state.items.find((x) => x.key === key);
     if (it && lmap && !leafletEl.hidden) setTimeout(() => centreLeaflet(it.lat, it.lng), 0);
+    renderSel();
     if (it && !stage.hidden) {
       const v = visible();
       if (it.inside && (it.sx === undefined || it.sx < v.l + 30 || it.sx > v.r - 30 || it.sy < v.t + 30 || it.sy > v.b - 10)) centreOn(it.lat, it.lng);
       applyView();
     }
-    renderSel();
+    if (key && focus) $("#place-h")?.focus();
+    if (closing && focus && returnTo) focusPin(returnTo);
   }
 
   function renderSel() {
     const it = state.items.find((x) => x.key === state.sel);
-    const mapEl = root.querySelector(".map");
-    root.querySelectorAll(".pin, .spin, .npin, .edge").forEach((p) => {
-      const on = !!it && p.dataset.key === it.key;
-      p.classList.toggle("on", on);
-      if (!p.classList.contains("edge")) p.setAttribute("aria-pressed", String(on));
+    root.querySelectorAll(".edge").forEach((p) => p.classList.toggle("on", !!it && p.dataset.key === it.key));
+    Object.entries(markers).forEach(([k, m]) => {
+      const el = m.getElement();
+      el?.firstElementChild?.classList.toggle("on", !!it && k === it.key);
+      if (el) { if (it && k === it.key) el.setAttribute("aria-current", "true"); else el.removeAttribute("aria-current"); }
     });
-    Object.entries(markers).forEach(([k, m]) => m.getElement()?.firstElementChild?.classList.toggle("on", !!it && k === it.key));
     if (!it) {
       state.sel = null;
-      $(".place").hidden = true;
+      place.hidden = true;
       mapEl.classList.remove("has-sheet");
       positionPills();
       return;
     }
-    $(".place").hidden = state.menu;
-    mapEl.classList.toggle("has-sheet", !state.menu);
+    place.hidden = false;
+    mapEl.classList.add("has-sheet");
 
     const dir = `https://www.google.com/maps/dir/?api=1&destination=${it.lat},${it.lng}`;
     let head, sub, text, link;
     if (it.kind === "site") {
       const e = entryOf(it.site.entry);
-      head = it.n ? `<span class="num">${it.n}</span>` : `<span class="num plain" aria-hidden="true"></span>`;
-      sub = e ? `${esc(e.date)}. ${esc(e.title)}` : "";
+      head = it.n ? `<span class="num" aria-hidden="true">${it.n}</span>` : `<span class="num plain" aria-hidden="true"></span>`;
+      sub = `${it.n ? `Walk stop ${it.n}. ` : ""}${e ? `${esc(e.date)}: ${esc(e.title)}` : ""}`;
       text = it.site.spot;
       link = `#/entry/${it.site.entry}`;
     } else if (it.kind === "nature") {
@@ -490,40 +608,96 @@ export function mapView(root, { sel } = {}) {
       text = s.summary || String(s.body).split(/\n\s*\n/)[0];
       link = `#/story/${s.id}`;
     }
-    $(".place").innerHTML = `
+    place.innerHTML = `
       <span class="grab" aria-hidden="true"></span>
       <button type="button" class="icon-btn sheet-close" data-act="close-place" aria-label="Close">${CLOSE}</button>
       <div class="place-head">
         ${head}
         <div>
-          <h2>${esc(it.name)}</h2>
+          <h2 id="place-h" tabindex="-1">${esc(it.name)}</h2>
           <p class="place-sub">${sub}</p>
         </div>
       </div>
       <p class="place-spot">${esc(text)}</p>
       <div class="actions">
         <a class="btn" href="${link}">${it.kind === "nature" ? "Read about it" : "Read the story"}</a>
-        <a class="link" href="${dir}" target="_blank" rel="noopener">Directions</a>
+        <a class="link" href="${dir}" target="_blank" rel="noopener">Directions<span class="sr-only"> (opens a maps app)</span></a>
       </div>`;
     positionPills();
   }
 
-  // The pill row sits just above the place sheet when one is open, else near the bottom.
+  // The pill row sits just above the place sheet when one is open (beside it on landscape phones).
   function positionPills() {
-    const place = $(".place"), pills = $(".map-pills");
+    const pills = $(".map-pills");
     const shown = !place.hidden;
-    pills.style.bottom = `${shown ? place.offsetHeight + 10 : 12}px`;
+    if (sidePanel()) {
+      pills.style.bottom = "12px";
+      pills.style.right = `${shown ? place.offsetWidth + 12 : 12}px`;
+    } else {
+      pills.style.right = "";
+      pills.style.bottom = `${shown ? place.offsetHeight + 10 : 12}px`;
+    }
     if (!stage.hidden) applyView();
   }
 
-  function toggleMenu(open) {
-    state.menu = open;
-    $(".layers").hidden = !open;
-    $(".place").hidden = open || !state.sel;
-    root.querySelector(".map").classList.toggle("has-sheet", !open && !!state.sel);
-    positionPills();
-    $('[data-act="menu"]').setAttribute("aria-expanded", String(open));
-    if (open) root.querySelector(".layer-row[aria-pressed='true']")?.focus();
+  // ---- Modal sheets (Choose a map, List) ----
+  const focusables = (el) => [...el.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')].filter((x) => !x.closest("[hidden]"));
+  function openDialog(sheet, trigger, focusEl) {
+    closeDialog(false);
+    state.dialog = { sheet, trigger };
+    sheet.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    for (const el of [canvas, $(".map-pills"), $(".map-head"), place]) el.inert = true;
+    (focusEl || focusables(sheet)[0])?.focus();
+  }
+  function closeDialog(returnFocus = true) {
+    const d = state.dialog;
+    if (!d) return;
+    state.dialog = null;
+    d.sheet.hidden = true;
+    d.trigger.setAttribute("aria-expanded", "false");
+    for (const el of [canvas, $(".map-pills"), $(".map-head"), place]) el.inert = false;
+    if (returnFocus) d.trigger.focus();
+  }
+  root.querySelectorAll('.sheet[role="dialog"]').forEach((sheet) => sheet.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") {
+      const f = focusables(sheet);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+      else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+    } else if ((e.key === "ArrowDown" || e.key === "ArrowUp") && e.target.getAttribute("role") === "radio") {
+      // Radio group: arrows move between the maps.
+      const radios = [...sheet.querySelectorAll('[role="radio"]')];
+      const i = radios.indexOf(e.target) + (e.key === "ArrowDown" ? 1 : -1);
+      radios[(i + radios.length) % radios.length].focus();
+      e.preventDefault();
+    }
+  }));
+
+  function openLayers() {
+    openDialog($(".layers"), $('[data-act="menu"]'), root.querySelector('.layer-row[aria-checked="true"]'));
+  }
+
+  function openList() {
+    const items = [...state.items].sort(order);
+    const groups = [
+      ["Walk stops", items.filter((i) => i.kind === "site" && i.n)],
+      ["Other places", items.filter((i) => i.kind === "site" && !i.n)],
+      ["Nature", items.filter((i) => i.kind === "nature")],
+      ["Stories", items.filter((i) => i.kind === "story")]
+    ].filter(([, list]) => list.length);
+    $(".place-list").innerHTML = groups.map(([title, list], gi) => `
+      <h3 class="list-h" id="list-g${gi}">${title}</h3>
+      <ul aria-labelledby="list-g${gi}">${list.map((it) => {
+        const mark = it.kind === "site" ? `<span class="pin-sample pin"><span class="${it.n ? "" : "plain"}">${it.n ?? ""}</span></span>`
+          : it.kind === "nature" ? `<span class="pin-sample npin"><span>${LEAF}</span></span>`
+          : `<span class="pin-sample spin${it.folk ? " folk" : ""}"><span>${glyph(it)}</span></span>`;
+        const sub = it.kind === "story" ? typeName(it.story.type) : it.kind === "nature" ? it.place.kind : (it.n ? `Walk stop ${it.n}` : "");
+        return `<li><button type="button" class="list-row" data-pick="${it.key}">${mark}
+          <span class="list-text"><span class="list-name">${esc(it.name)}</span>${sub ? `<span class="list-sub">${esc(sub)}</span>` : ""}</span></button></li>`;
+      }).join("")}</ul>`).join("");
+    openDialog($(".list-sheet"), $('[data-act="list"]'));
   }
 
   function toast(msg) {
@@ -562,29 +736,41 @@ export function mapView(root, { sel } = {}) {
 
   // Listen on this view's own element: #view is shared by every screen, so a listener on it
   // would outlive this map and keep acting on a removed Leaflet map.
-  root.querySelector(".map").addEventListener("click", (e) => {
+  mapEl.addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b) return;
-    if (b.dataset.key) { if (!moved) select(b.dataset.key); }
-    else if (b.dataset.act === "close-place") select(null);
-    else if (b.dataset.act === "key") {
+    const act = b.dataset.act;
+    if (b.dataset.key) { if (!moved) select(b.dataset.key, { focus: true }); }
+    else if (b.dataset.pick) { closeDialog(false); state.sel = null; select(b.dataset.pick, { focus: true }); }
+    else if (b.dataset.layer) { setLayer(b.dataset.layer); closeDialog(); }
+    else if (act === "close-place") select(null, { focus: true });
+    else if (act === "close-dialog") closeDialog();
+    else if (act === "menu") openLayers();
+    else if (act === "list") openList();
+    else if (act === "key") {
       const key = $(".map-key"), open = key.hidden;
       key.hidden = !open; b.setAttribute("aria-expanded", String(open));
       if (!stage.hidden) applyView();
-    }
-    else if (b.dataset.layer) { setLayer(b.dataset.layer); toggleMenu(false); }
-    else if (b.dataset.act === "menu") toggleMenu(!state.menu);
-    else if (b.dataset.act === "close") toggleMenu(false);
-    else if (b.dataset.act === "locate") locate();
-    else if (b.dataset.act === "zoom-in" || b.dataset.act === "zoom-out") {
+    } else if (act === "attrib") {
+      const p = $(".map-attrib"), open = !p.classList.contains("open");
+      p.classList.toggle("open", open); b.setAttribute("aria-expanded", String(open));
+      b.setAttribute("aria-label", open ? "Show less of the map credits" : "Show full map credits");
+      if (!stage.hidden) applyView();
+    } else if (act === "locate") locate();
+    else if (act === "zoom-in" || act === "zoom-out") {
       const v = visible();
-      zoomAt(b.dataset.act === "zoom-in" ? 1.6 : 1 / 1.6, (v.l + v.r) / 2, (v.t + v.b) / 2);
+      zoomAt(act === "zoom-in" ? 1.6 : 1 / 1.6, (v.l + v.r) / 2, (v.t + v.b) / 2);
     }
+  });
+  // Leaflet markers are focusable divs: Enter or Space chooses them like a button.
+  leafletEl.addEventListener("keydown", (e) => {
+    const el = e.target.closest(".leaflet-marker-icon[data-key]");
+    if (el && (e.key === "Enter" || e.key === " ")) { select(el.dataset.key, { focus: true }); e.preventDefault(); }
   });
   const onKey = (e) => {
     if (e.key !== "Escape") return;
-    if (state.menu) toggleMenu(false);
-    else if (state.sel) select(null);
+    if (state.dialog) closeDialog();
+    else if (state.sel) select(null, { focus: true });
   };
   document.addEventListener("keydown", onKey);
 
@@ -594,7 +780,7 @@ export function mapView(root, { sel } = {}) {
     const w = state.wanted;
     if (!w) return;
     const hit = state.items.find((i) => i.key === `site:${w}`) || state.items.find((i) => i.key === `nature:${w}`) || state.items.find((i) => i.key === `story:${w}`);
-    if (hit) state.sel = hit.key;
+    if (hit) { state.sel = hit.key; state.opener = hit.key; }
   };
 
   pickWanted();

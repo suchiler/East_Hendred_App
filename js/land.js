@@ -22,7 +22,7 @@ const paras = (list = []) => list.map((p) => `<p>${esc(p)}</p>`).join("");
 function sourcesBlock(sources = [], check) {
   if (!sources.length && !check) return "";
   return `<details class="land-sources">
-    <summary>Sources${sources.length ? ` (${sources.length})` : ""}</summary>
+    <summary>Sources${sources.length ? ` (${sources.length})` : ""}<span class="tri" aria-hidden="true"></span></summary>
     ${check ? `<p class="check"><b>Still to check:</b> ${esc(check)}</p>` : ""}
     <ul>${sources.map((s) => `<li>${s.url ? ext(s.url, s.label) : esc(s.label)}</li>`).join("")}</ul>
   </details>`;
@@ -93,9 +93,9 @@ function sectionHtml(s, data, open) {
       ${living ? speciesList(data.species, data.speciesFurther) + redKitePanel(data.redKite) : ""}
       ${s.lookFor ? `<p class="look"><b>Look for</b> ${esc(s.lookFor)}</p>` : ""}
       ${s.place ? `<a class="link" href="#/map/${esc(s.place)}">Show on the map</a>` : ""}
-      ${s.issues ? `<section class="issues" aria-label="Current issues">
+      ${s.issues ? `<section class="issues" aria-labelledby="issue-${esc(s.id)}">
         <p class="kicker">Current issues</p>
-        <h3>${esc(s.issues.title)}</h3>
+        <h3 id="issue-${esc(s.id)}">${esc(s.issues.title)}</h3>
         ${paras(s.issues.body)}
         ${s.link ? `<a class="issue-link" href="${esc(s.link.url)}" target="_blank" rel="noopener">${esc(s.link.label)} <span aria-hidden="true">→</span><span class="sr-only"> (opens in a new tab)</span></a>` : ""}
       </section>` : ""}
@@ -138,7 +138,9 @@ export function landView(root, arg) {
         </div>
         <section class="deep" aria-labelledby="deep-h">
           <h2 id="deep-h">Before people</h2>
-          <ol>${(data.deepTime || []).map((d) => `<li><span class="when">${esc(d.when)}</span><span class="what">${esc(d.what)}</span></li>`).join("")}</ol>
+          <div class="deep-scroll" role="region" aria-label="Before people timeline" tabindex="0">
+            <ol>${(data.deepTime || []).map((d) => `<li><span class="when">${esc(d.when)}</span><span class="what">${esc(d.what)}</span></li>`).join("")}</ol>
+          </div>
           <div class="deep-src">${sourcesBlock(data.deepTimeSources)}</div>
         </section>
         <div class="page">
@@ -159,7 +161,7 @@ export function landView(root, arg) {
       if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
     }
     // The loading screen's heading had focus; it's been replaced, so focus the new one.
-    if (document.activeElement === document.body) focusHeading(root);
+    focusHeading(root);
   });
   return () => { alive = false; };
 }

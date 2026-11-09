@@ -4,7 +4,7 @@ import { timelineView, entryView, storiesView, storyView, walkView } from "./vie
 import { mapView } from "./map.js";
 import { landView } from "./land.js";
 import { LA_DEFS } from "./land-art.js";
-import { focusHeading } from "./util.js";
+import { focusHeading, nav } from "./util.js";
 
 document.body.insertAdjacentHTML("afterbegin", FILTER_DEFS + LA_DEFS);
 
@@ -49,12 +49,20 @@ function route() {
   const h1 = view.querySelector("h1");
   if (page !== "story") document.title = page === "timeline" ? "East Hendred Through Time"
     : `${page === "entry" ? (h1?.textContent || "").trim() : TITLES[page]} · East Hendred Through Time`;
-  // On navigation (not the first load), take focus to the new screen's heading.
-  if (document.activeElement !== document.body) focusHeading(view);
+  // After every in-app navigation (not the first load), take focus to the new screen's heading.
+  // Screens that load content first (story, land) focus their heading once it's rendered.
+  focusHeading(view);
 }
 
 window.addEventListener("hashchange", route);
 route();
+nav.initial = false;
+
+// Skip link: move focus to the content without changing the address (which would re-route).
+document.querySelector(".skip")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  view.focus();
+});
 
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   navigator.serviceWorker.register("sw.js").catch(() => {});

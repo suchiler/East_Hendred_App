@@ -15,8 +15,13 @@ export const store = {
   }
 };
 
+// True only while the app is first loading: focus isn't moved then, so the page reads from the top.
+export const nav = { initial: true };
+
 // Move focus to a screen's heading after it renders, for screen-reader and keyboard users.
+// Skipped on the very first load.
 export function focusHeading(root) {
+  if (nav.initial) return;
   const h1 = root.querySelector("h1");
   if (!h1) return;
   h1.setAttribute("tabindex", "-1");
