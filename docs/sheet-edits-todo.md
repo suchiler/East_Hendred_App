@@ -1,5 +1,7 @@
 # Sheet edits to make by hand
 
+**Applied to the Library tab on 2026-11-09. Nothing left to do; kept as a record.**
+
 The Google Sheets connector wasn’t available in this session, so these story fixes were made in `content/stories.json` only.
 Make the same edits in the **Library** tab of the Stories spreadsheet (id `1HXDAIVmzE1G03FDKcYGBA3bxwfpH0N3jWjRQA-9Jt5A`) before the next “Publish to app”, or they’ll be undone.
 Find each row by its **ID** column and replace the whole cell in the named column with the new value.
