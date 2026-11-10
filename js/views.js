@@ -153,7 +153,7 @@ export function entryView(root, id) {
       ${older ? `<a class="older" href="#/entry/${older.id}"><span class="dir">Older · ${esc(older.date)} ↓</span><span class="t">${esc(older.title)}</span></a>` : `<span></span>`}
     </nav>`;
 
-  let tick;
+  let tick, alive = true;
   const nt = root.querySelector(".next-tune");
   if (nt) {
     const paint = () => { nt.textContent = `Next: ${clock.summary().short}.`; };
@@ -161,6 +161,7 @@ export function entryView(root, id) {
     tick = setInterval(paint, 30000);
   }
   loadStories().then((list) => {
+    if (!alive) return;
     const rel = list.filter((st) => st.linkedEntry === x.id);
     const box = root.querySelector(".related");
     if (!rel.length || !box) return;
@@ -171,7 +172,7 @@ export function entryView(root, id) {
   root.querySelector(".share")?.addEventListener("click", () => {
     navigator.share({ title: x.title, text: `${x.date}: ${x.title} — East Hendred through time`, url: location.href }).catch(() => {});
   });
-  return () => clearInterval(tick);
+  return () => { alive = false; clearInterval(tick); };
 }
 
 // ---------- Stories ----------
@@ -455,7 +456,7 @@ export function walkView(root) {
     $(".current").className = `current ${finished ? "done" : ""}`;
     $(".current").innerHTML = finished ? `
         <h2 tabindex="-1">Walk complete</h2>
-        <p>Seven stops and eight centuries of village history. Still have legs? Head up to Scutchamer Knob on the Ridgeway.</p>
+        <p>${total} stops and eight centuries of village history. Still have legs? Head up to Scutchamer Knob on the Ridgeway.</p>
         <button type="button" class="btn-outline" data-act="restart">Start again</button>`
       : `
         <p class="era-line">Stop ${step + 1} of ${total} · ${esc(era.name)}, ${esc(cur.entryObj.date)}</p>

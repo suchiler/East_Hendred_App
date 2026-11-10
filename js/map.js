@@ -1,6 +1,6 @@
 // The map view: the painted village map (a pre-rendered image), plus real tiled maps
 // (today, habitats, geology) through Leaflet. Places are positioned from their lat/lng;
-// anything beyond the drawing gets a marker at the edge pointing to it.
+// places beyond the painted drawing have no pin there, but are in the List and on the real maps.
 //
 // Accessibility: the header and controls come first in tab order, then the pins (walk
 // stops in number order, then other places, nature and stories). "List" offers every
@@ -13,7 +13,6 @@ import { loadStories, isFolklore, typeName } from "./stories.js";
 import { esc } from "./util.js";
 
 const entryOf = (id) => ENTRIES.find((e) => e.id === id);
-const ARROW = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>';
 const CLOSE = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 const LEAF = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15"/><path d="M5 19 13 11"/></svg>';
 const MAX_ZOOM = 3.5;
@@ -28,7 +27,7 @@ const RANK = { site: 0, nature: 1, story: 2 };
 const order = (a, b) => (RANK[a.kind] - RANK[b.kind]) || ((a.n ?? 99) - (b.n ?? 99));
 
 function siteItems() {
-  return SITES.map((s) => ({ key: `site:${s.id}`, kind: "site", id: s.id, n: s.n, name: s.name, short: s.short, tiny: s.tiny, lat: s.lat, lng: s.lng, site: s }));
+  return SITES.map((s) => ({ key: `site:${s.id}`, kind: "site", id: s.id, n: s.n, name: s.name, short: s.short, lat: s.lat, lng: s.lng, site: s }));
 }
 function natureItems() {
   return NATURE_SITES.map((s) => ({ key: `nature:${s.id}`, kind: "nature", id: s.id, name: s.name, short: s.short, lat: s.lat, lng: s.lng, place: s }));
@@ -93,7 +92,6 @@ export function mapView(root, { sel } = {}) {
             List
           </button>
           <button type="button" class="pill key-btn" data-act="key" aria-expanded="false" aria-controls="map-key">Key</button>
-          <div class="bottom-edges"></div>
         </div>
         <p class="map-attrib">
           <button type="button" class="attrib-toggle" data-act="attrib" aria-expanded="false" aria-label="Show full map credits" hidden>i</button>
@@ -105,7 +103,6 @@ export function mapView(root, { sel } = {}) {
         <div class="map-stage" style="width:${MAP_W}px;height:${MAP_H}px">${PAINTED_IMG}</div>
         <div class="map-leaflet" hidden></div>
         <div class="pins"></div>
-        <div class="edge-markers"></div>
         <div class="zoom-ctl">
           <button type="button" data-act="zoom-in" aria-label="Zoom in">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -209,18 +206,16 @@ export function mapView(root, { sel } = {}) {
   }
 
   // ---- Pins (screen space, so they stay the same size at any zoom) ----
-  let offMap = [];
   let pinsSig = "";
   function placePins() {
-    if (stage.hidden) { pinsEl.innerHTML = ""; pinsSig = ""; placeEdges(); return; }
+    if (stage.hidden) { pinsEl.innerHTML = ""; pinsSig = ""; return; }
     const s = S();
     const placed = [];
-    offMap = [];
     const html = [], moves = [], keys = [];
     for (const it of [...state.items].sort(order)) {
       const p = project(it.lat, it.lng);
       it.inside = p.inside;
-      if (!p.inside) { offMap.push({ ...it, p }); it.sx = undefined; continue; }
+      if (!p.inside) { it.sx = undefined; continue; }
       let x = view.dx + p.x * s, y = view.dy + p.y * s;
       // Nudge pins off pins already placed so their 44px touch targets don't overlap
       // (walk stops are placed first, so they move least). Zooming in separates them anyway.
@@ -267,7 +262,6 @@ export function mapView(root, { sel } = {}) {
       el.classList.toggle("offstage", !!under && el !== document.activeElement);
     }
     placeTag(placed);
-    placeEdges();
   }
 
   // The selected place's name, on whichever side doesn't cover a neighbouring pin.
@@ -297,50 +291,6 @@ export function mapView(root, { sel } = {}) {
     for (const o of options) { const sc = score(o); if (sc < bestScore) { best = o; bestScore = sc; } }
     tag.style.left = `${best[0]}px`;
     tag.style.top = `${best[1]}px`;
-  }
-
-  // One marker per distinct off-map spot, at the edge, pointing towards it.
-  function placeEdges() {
-    const edges = $(".edge-markers"), bottom = $(".bottom-edges");
-    const focusedKey = document.activeElement?.closest?.(".edge")?.dataset.key;
-    edges.innerHTML = ""; bottom.innerHTML = "";
-    if (stage.hidden) return;
-    // Group off-map places within about 600 m of each other into one marker.
-    const groups = [];
-    for (const it of [...offMap].sort(order)) {
-      const g = groups.find((x) => distanceKm([x[0].lat, x[0].lng], [it.lat, it.lng]) < 0.6);
-      if (g) g.push(it); else groups.push([it]);
-    }
-    const v = visible();
-    const R = { l: 12, r: v.r - 60, t: v.t + 12, b: v.b - 8 };
-    const cx = (R.l + R.r) / 2, cy = (R.t + R.b) / 2;
-    const s = S();
-    const narrow = v.W < 360;
-    groups.forEach((g) => {
-      const lead = g.find((i) => i.kind === "site") || g[0];
-      const label = narrow && lead.tiny ? lead.tiny : lead.short;
-      const extra = g.length > 1 ? `, and ${g.length - 1} more ${g.length === 2 ? "place" : "places"} nearby` : "";
-      const vx = view.dx + lead.p.x * s - cx, vy = view.dy + lead.p.y * s - cy;
-      const angle = Math.atan2(vx, -vy) * 180 / Math.PI;
-      const tx = vx ? ((vx > 0 ? R.r : R.l) - cx) / vx : Infinity;
-      const ty = vy ? ((vy > 0 ? R.b : R.t) - cy) / vy : Infinity;
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = `pill edge${lead.key === state.sel ? " on" : ""}`;
-      btn.dataset.key = lead.key;
-      btn.setAttribute("aria-label", `${lead.name}${extra}, beyond the edge of this map`);
-      btn.innerHTML = `<span class="arrow" aria-hidden="true" style="transform:rotate(${angle}deg)">${ARROW}</span>${esc(label)}`;
-      if (ty <= tx && vy > 0) bottom.appendChild(btn);
-      else {
-        edges.appendChild(btn);
-        const t = Math.min(tx, ty), w = btn.offsetWidth, h = btn.offsetHeight;
-        const px = Math.max(R.l + w / 2, Math.min(R.r - w / 2, cx + vx * t));
-        const py = Math.max(R.t + h / 2, Math.min(R.b - h / 2, cy + vy * t));
-        btn.style.left = `${px - w / 2}px`;
-        btn.style.top = `${py - h / 2}px`;
-      }
-      if (focusedKey === lead.key) btn.focus({ preventScroll: true });
-    });
   }
 
   // ---- Drag, pinch and wheel on the painted map ----
@@ -506,11 +456,15 @@ export function mapView(root, { sel } = {}) {
     attrib.classList.remove("loading");
     if (!painted) {
       ensureLeaflet();
+      if (!lmap) toast("This map couldn’t start. Check your signal and reload the app.");
       if (lmap) {
         if (tiles) lmap.removeLayer(tiles);
         if (overlay) { lmap.removeLayer(overlay); overlay = null; }
         // crossOrigin: OSM allows it, and the offline cache stores CORS tiles far more compactly than opaque ones.
         tiles = L.tileLayer(l.url, { maxZoom: l.maxZoom || 18, crossOrigin: /openstreetmap\.org/.test(l.url) }).addTo(lmap);
+        // Say so if the base map can't load (offline, or the map server refusing), rather than a blank screen.
+        let warned = false;
+        tiles.on("tileerror", () => { if (!warned) { warned = true; toast(navigator.onLine === false ? "You’re offline, so only map areas you’ve already viewed will show." : "Some of this map couldn’t load. Check your signal and try again."); } });
         if (l.wms) {
           const big = l.wms.tileSize === 512;
           overlay = L.tileLayer.wms(l.wms.url, { layers: l.wms.layers, format: "image/png", transparent: true,
@@ -564,7 +518,7 @@ export function mapView(root, { sel } = {}) {
   // ---- Selection and the place sheet ----
   function focusPin(key) {
     const sel = `[data-key="${CSS.escape(key)}"]`;
-    const el = pinsEl.querySelector(sel) || root.querySelector(`.edge${sel}`) || markers[key]?.getElement() || $('[data-act="list"]');
+    const el = pinsEl.querySelector(sel) || markers[key]?.getElement() || $('[data-act="list"]');
     el?.focus({ preventScroll: false });
   }
 
@@ -589,7 +543,6 @@ export function mapView(root, { sel } = {}) {
 
   function renderSel() {
     const it = state.items.find((x) => x.key === state.sel);
-    root.querySelectorAll(".edge").forEach((p) => p.classList.toggle("on", !!it && p.dataset.key === it.key));
     Object.entries(markers).forEach(([k, m]) => {
       const el = m.getElement();
       el?.firstElementChild?.classList.toggle("on", !!it && k === it.key);

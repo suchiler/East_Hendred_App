@@ -43,7 +43,6 @@ button { font: inherit; color: inherit; }
 .skip:focus { transform: none; }
 .muted { color: var(--muted); }
 .small { font-size: 0.875rem; }
-.gap { background: rgba(176, 71, 58, 0.12); color: #8c3b2c; padding: 0 3px; }
 .art { display: block; }
 
 /* ---------- Shell ---------- */
@@ -346,12 +345,6 @@ button { font: inherit; color: inherit; }
   position: absolute; z-index: 4; pointer-events: none !important; white-space: nowrap;
   background: var(--paper); border: 1.5px solid var(--ink); border-radius: 3px; padding: 2px 7px; font-size: 0.875rem; font-weight: 600;
 }
-.edge-markers { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
-.edge-markers .pill { position: absolute; pointer-events: auto; }
-.pill.edge { gap: 6px; padding: 0 12px; }
-.pill.edge .arrow { display: inline-flex; transition: none; }
-.pill.edge.on { background: var(--woad); border-color: var(--woad); color: #fff; }
-.bottom-edges { display: flex; gap: 8px; pointer-events: auto; overflow: hidden; }
 .zoom-ctl {
   position: absolute; right: 12px; top: calc(88px + env(safe-area-inset-top, 0px)); z-index: 4;
   display: flex; flex-direction: column; background: var(--paper); border: 1.5px solid var(--ink); border-radius: 3px;
@@ -379,7 +372,6 @@ button { font: inherit; color: inherit; }
 }
 .map-pills { position: absolute; z-index: 600; left: 12px; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
 .pill-row { display: flex; gap: 8px; align-items: center; }
-.pill-row .bottom-edges { margin-left: auto; }
 .map-attrib {
   pointer-events: auto; align-self: flex-start; max-width: 100%; margin: 0;
   font-size: 0.875rem; line-height: 1.35; color: var(--muted);
@@ -690,3 +682,7 @@ button { font: inherit; color: inherit; }
 .this-month input { width: 22px; height: 22px; margin: 1px 0 0; flex-shrink: 0; accent-color: var(--c); }
 .tm-name { font-weight: 600; }
 .tm-when { display: block; font-size: 0.875rem; color: var(--soft); }
+/* Small phones: keep the three map buttons on one row. */
+@media (max-width: 359px) {
+  .pill-row .pill { padding: 0 10px; gap: 6px; }
+}

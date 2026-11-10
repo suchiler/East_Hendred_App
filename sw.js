@@ -1,7 +1,7 @@
 // Offline support: the app itself is cached on first visit; map tiles are cached
 // as you look at them (up to a limit), so the village maps keep working on a walk
 // with poor signal.
-const VERSION = "eh-v10";
+const VERSION = "eh-v11";
 const SHELL = [
   "./",
   "index.html",
@@ -29,7 +29,9 @@ const SHELL = [
   "icons/icon-192.png",
   "icons/icon-512.png"
 ];
-const TILE_CACHE = "eh-tiles";
+// Renamed from "eh-tiles": that cache held tiles saved in no-CORS mode ("opaque"), which the
+// browser refuses when the map now asks for them with CORS. The old cache is deleted on activate.
+const TILE_CACHE = "eh-tiles-2";
 const TILE_LIMIT = 600;
 
 self.addEventListener("install", (e) => {
@@ -61,7 +63,8 @@ self.addEventListener("fetch", (e) => {
   if (isTile(url)) {
     e.respondWith(caches.open(TILE_CACHE).then(async (c) => {
       const hit = await c.match(req);
-      if (hit) return hit;
+      // An opaque copy can't answer a CORS request (the image would fail): fetch it again instead.
+      if (hit && !(req.mode === "cors" && hit.type === "opaque")) return hit;
       const res = await fetch(req);
       if (res.ok || res.type === "opaque") c.put(req, res.clone()).then(() => trim(TILE_CACHE, TILE_LIMIT)).catch(() => {});
       return res;
